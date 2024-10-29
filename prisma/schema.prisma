@@ -1,0 +1,266 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id               Int              @id @default(autoincrement())
+  email            String           @unique
+  password         String
+  firstname        String?
+  lastname         String?
+  phone            String?
+  resettoken       String?
+  resettokenExpire DateTime?
+  googleId         String?
+  created_at       DateTime         @default(now()) @db.Timestamp(0)
+  updated_at       DateTime         @updatedAt @db.Timestamp(0)
+  role             Role             @default(USER)
+  // Relations
+  pets             Pets[]
+  HomeImage        HomeImages[]
+  adoptions        Adopts[]         @relation("UserAdoptions")
+  donations        Donates[]
+  eventAttendees   EventAttendees[]
+  volunteer        Volunteers?
+}
+
+enum Role {
+  USER
+  ADMIN
+  VOLUNTEER
+}
+
+model HomeImages {
+  id     Int    @id @default(autoincrement())
+  url    String
+  userId Int    @map("user_id")
+  user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Pets {
+  //both th and en inputs are required for name, description, and breed
+  id              Int      @id @default(autoincrement())
+  name_en         String
+  name_th         String
+  age             DateTime
+  color           String
+  gender          Gender
+  type            PetType
+  status          Status   @default(AVAILABLE)
+  breed_en        String?
+  breed_th        String?
+  description_en  String?  @db.Text
+  description_th  String?  @db.Text
+  medical_history String?  @db.Text
+  is_vaccinated   Boolean  @default(false)
+  is_neutered     Boolean  @default(false)
+  weight          Float?
+  created_at      DateTime @default(now()) @db.Timestamp(0)
+  updated_at      DateTime @updatedAt @db.Timestamp(0)
+
+  // Foreign keys and Relations
+  userId    Int?        @map("user_id")
+  User      Users?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image     PetImages[]
+  adoptions Adopts[]    @relation("PetAdoptions")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum PetType {
+  DOG
+  CAT
+}
+
+enum Status {
+  AVAILABLE
+  PENDING
+  ADOPTED
+  FOSTERED
+  UNAVAILABLE
+}
+
+model PetImages {
+  id    Int    @id @default(autoincrement())
+  url   String
+  petId Int    @map("pet_id")
+  pet   Pets   @relation(fields: [petId], references: [id], onDelete: Cascade)
+}
+
+model Adopts {
+  id     Int    @id @default(autoincrement())
+  userId Int    @map("user_id")
+  petId  Int    @map("pet_id")
+  status Status @default(PENDING)
+
+  // Personal Information
+  address       String
+  career        String
+  workTime      String
+  workPlace     String
+  dayOff        String
+  salary        Int
+  dateOfBirth   DateTime @map("date_of_birth")
+  socialContact String? // FB/IG/Line ID/Skype
+
+  // Pet & Living Situation
+  currentPetCount   Int     @map("current_pet_count")
+  currentPetDetails String  @map("current_pet_details") @db.Text
+  familyMemberCount Int     @map("family_member_count")
+  familyAlwaysHome  Boolean @map("family_always_home")
+  aloneHours        Int?    @map("alone_hours") // Hours pet will be alone
+
+  // Housing Information
+  housingType HousingType @map("housing_type")
+  hasGarden   Boolean     @map("has_garden")
+  hasFence    Boolean     @map("has_fence")
+  canWalkDog  Boolean     @map("can_walk_dog")
+
+  // Delivery Preference
+  deliveryType DeliveryType @map("delivery_type")
+
+  // Images
+  accommodationImages AccommodationImages[]
+
+  // Approval Process
+  approved_at        DateTime?
+  approved_by        Int?
+  notes              String?   @db.Text
+  home_image_checked Boolean   @default(false)
+  created_at         DateTime  @default(now()) @db.Timestamp(0)
+
+  // Relations
+  user Users @relation("UserAdoptions", fields: [userId], references: [id])
+  pet  Pets  @relation("PetAdoptions", fields: [petId], references: [id])
+}
+
+enum HousingType {
+  OWN_HOUSE
+  RENTAL_HOUSE
+  CONDO
+  APARTMENT
+  RENTAL_ROOM
+  SINGLE_HOUSE
+}
+
+enum DeliveryType {
+  REQUIRE_DELIVERY
+  PICK_UP
+}
+
+model AccommodationImages {
+  id      Int    @id @default(autoincrement())
+  url     String
+  adoptId Int    @map("adopt_id")
+  adopt   Adopts @relation(fields: [adoptId], references: [id], onDelete: Cascade)
+}
+
+model Donates {
+  id             Int           @id @default(autoincrement())
+  userId         Int           @map("user_id")
+  total          Int
+  payment_method paymentMethod
+  transaction_id String        @unique
+  is_recurring   Boolean       @default(false)
+  receipt_url    String?
+  status         donateStatus  @default(PENDING)
+  created_at     DateTime      @default(now()) @db.Timestamp(0)
+
+  // Relation
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum paymentMethod {
+  CREDIT
+  PROMPTPAY
+}
+
+enum donateStatus {
+  DONE
+  PENDING
+  CANCEL
+}
+
+model Events {
+  id             Int           @id @default(autoincrement())
+  title_en       String
+  title_th       String
+  description_en String        @db.Text
+  description_th String        @db.Text
+  date_start     DateTime
+  date_end       DateTime
+  status         EventStatus   @default(PENDING)
+  location       String
+  created_at     DateTime      @default(now()) @db.Timestamp(0)
+  updated_at     DateTime      @updatedAt @db.Timestamp(0)
+  image          EventImages[]
+
+  // Relations
+  attendees EventAttendees[]
+}
+
+enum EventStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  POSTPONED
+}
+
+model EventImages {
+  id      Int    @id @default(autoincrement())
+  eventId Int    @map("event_id")
+  event   Events @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  url     String
+}
+
+model EventAttendees {
+  event   Events @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId Int    @map("event_id")
+  user    Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int    @map("user_id")
+
+  @@id([eventId, userId])
+}
+
+model Volunteers {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @unique @map("user_id")
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  updated_at     DateTime @updatedAt @db.Timestamp(0)
+  description_th String?
+  description_en String?
+
+  // Relations
+  user         Users                    @relation(fields: [userId], references: [id])
+  skills       VolunteerSkills[]
+  availability VolunteerAvailabilitys[]
+}
+
+model VolunteerSkills {
+  id          Int        @id @default(autoincrement())
+  name        String
+  volunteerId Int        @map("volunteer_id")
+  volunteer   Volunteers @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+}
+
+model VolunteerAvailabilitys {
+  id          Int        @id @default(autoincrement())
+  timeSlot    String     @map("time_slot")
+  volunteerId Int        @map("volunteer_id")
+  volunteer   Volunteers @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+}
