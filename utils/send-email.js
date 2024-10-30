@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 
-const sendEmail = async (recipient, subject, message, token) => {
+const sendEmailByNodemailer = async (recipient, subject, message, googleId) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         host: 'smtp.gmail.com',
@@ -11,18 +11,15 @@ const sendEmail = async (recipient, subject, message, token) => {
             pass: process.env.EMAIL_PASS,
         },
     });
-    console.log('recipient :>> ', recipient);
+
     const mailOptions = {
-        from: process.env.EMAIL_ADMIN,  // ใช้ admin ในช่อง from
-        to: process.env.EMAIL_ADMIN,    // ส่งถึง admin เอง
-        replyTo: recipient,  // ใส่ email ลูกค้าใน replyTo เพื่อให้ Admin ตอบกลับได้
+        from: googleId ? recipient : process.env.EMAIL_ADMIN,
+        to: process.env.EMAIL_ADMIN,
+        replyTo: googleId ? recipient : process.env.EMAIL_ADMIN,
         subject: subject,
-        text: `ข้อความจาก ${recipient}:\n\n${message}`,  // แจ้งผู้ส่งในเนื้อหา
+        text: `Message from ${recipient}:\n\n${message}`,
     };
 
-
-
-    // พยายามส่งอีเมลและจัดการข้อผิดพลาดหากมี
     try {
         await transporter.sendMail(mailOptions);
         return { success: true, message: 'Email sent successfully' };
@@ -31,4 +28,4 @@ const sendEmail = async (recipient, subject, message, token) => {
     }
 };
 
-module.exports = sendEmail;
+module.exports = sendEmailByNodemailer;

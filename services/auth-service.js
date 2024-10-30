@@ -21,3 +21,31 @@ exports.createNewUser = (hashPassword, email) => {
     })
 
 }
+exports.findUserByGoogleId = async (googleId) => {
+    return await prisma.users.findUnique({
+        where: {
+            googleId: googleId,
+        },
+    });
+};
+
+
+exports.createGoogleUser = async (data) => {
+    return await prisma.users.create({
+        data: {
+            googleId: data.googleId,
+            email: data.email,
+            password: '',
+            firstname: data.firstname
+        },
+    });
+};
+
+exports.updateUser = async (id, data) => {
+    return await prisma.users.update({
+        where: {
+            id: id,
+        },
+        data: data,
+    });
+};
