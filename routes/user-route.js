@@ -7,8 +7,8 @@ const { authenticate } = require("../middlewares/authenticate");
 
 
 router.post('/send-email', authenticate, sendEmail)
-router.post('/donate', donate)
-router.patch('/donate/:id', updateDonationStatus)
+router.post('/donate',authenticate, donate)
+router.patch('/donate/:id',authenticate, updateDonationStatus)
 
 
 
