@@ -1,7 +1,12 @@
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const prisma = require("../configs/prisma")
+const createError = require('../utils/createError');
+
 
 const sendEmailByNodemailer = require('../utils/send-email');
-const jwt = require('jsonwebtoken');
+const { getUserProfile, checkUserByUserId } = require('../services/user-service');
+
 
 
 exports.sendEmail = async (req, res) => {
@@ -30,3 +35,63 @@ exports.sendEmail = async (req, res) => {
         res.status(401).json({ message: 'Unauthorized: Invalid or expired token', error });
     }
 };
+
+
+exports.getProfile = async (req, res, next) => {
+    try {
+
+        const userId = req.user.id;
+        console.log(userId, "userrrrIDdd");
+
+        const user = await getUserProfile(userId);
+
+        if (!user) {
+            return createError(404, "User not found");
+        }
+        res.json(user);
+
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.editProfile = async (req, res, next) => {
+    try {
+
+        const userId = Number(req.params.userId);
+        const { firstname, lastname, phone, email } = req.body;
+
+        const checkUser = await checkUserByUserId(userId);
+
+        if (!checkUser) {
+            return next(createError(404, "User not found"));
+        }
+
+        const checkPhone = await prisma.users.findFirst({
+            where: { phone },
+        });
+        if (checkPhone && checkPhone.id !== userId) {
+            return next(createError(400, "Phone number already exists"));
+        }
+
+        const checkEmail = await prisma.users.findFirst({
+            where: { email },
+        });
+        if (checkEmail && checkEmail.id !== userId) {
+            return next(createError(400, "Email already exists"));
+        }
+
+        // อัปเดตข้อมูลผู้ใช้
+        const updatedUser = await prisma.users.update({
+            where: { id: userId }, // ใช้ userId ในการอัปเดต
+            data: { firstname, lastname, phone, email },
+        });
+
+        res.json({ message: "Update success", user: updatedUser });
+    } catch (err) {
+        console.error("Error in editProfile:", err);
+        next(err);
+    }
+};
+
+
