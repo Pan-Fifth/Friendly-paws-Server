@@ -56,28 +56,27 @@ const EVENT_IMAGES = [
 ]
 
 async function main() {
-    // Cleaning existing data...
     await prisma.$transaction([
-        prisma.volunteerAvailability.deleteMany(),
-        prisma.volunteerSkill.deleteMany(),
-        prisma.volunteer.deleteMany(),
-        prisma.eventAttendee.deleteMany(),
-        prisma.eventImage.deleteMany(),
-        prisma.event.deleteMany(),
-        prisma.donate.deleteMany(),
-        prisma.accommodationImage.deleteMany(),
-        prisma.adopt.deleteMany(),
-        prisma.petImage.deleteMany(),
-        prisma.pet.deleteMany(),
+        prisma.volunteerAvailabilities.deleteMany(),
+        prisma.volunteerSkills.deleteMany(),
+        prisma.volunteers.deleteMany(),
+        prisma.eventAttendees.deleteMany(),
+        prisma.eventImages.deleteMany(),
+        prisma.events.deleteMany(),
+        prisma.donates.deleteMany(),
+        prisma.accommodationImages.deleteMany(),
+        prisma.adopts.deleteMany(),
+        prisma.petImages.deleteMany(),
+        prisma.pets.deleteMany(),
         prisma.homeImages.deleteMany(),
-        prisma.user.deleteMany(),
+        prisma.users.deleteMany(),
     ])
 
     // Creating 15 users with different roles
     const users = await Promise.all(
         Array(15).fill().map(async (_, i) => {
             const role = i < 2 ? 'ADMIN' : i < 5 ? 'VOLUNTEER' : 'USER'
-            return prisma.user.create({
+            return prisma.users.create({
                 data: {
                     email: `user${i + 1}@example.com`,
                     password: await bcrypt.hash('password123', 10),
@@ -94,7 +93,7 @@ async function main() {
     const pets = await Promise.all(
         Array(20).fill().map(async (_, i) => {
             const isDog = i < 10
-            return prisma.pet.create({
+            return prisma.pets.create({
                 data: {
                     name_en: isDog ? `Dog${i + 1}` : `Cat${i - 9}`,
                     name_th: isDog ? `สุนัข${i + 1}` : `แมว${i - 9}`,
@@ -109,8 +108,7 @@ async function main() {
                     is_vaccinated: Math.random() > 0.3,
                     is_neutered: Math.random() > 0.3,
                     weight: 10 + Math.random() * 20,
-                    userId: users[Math.floor(Math.random() * users.length)].id,
-                    images: {
+                    image: {
                         create: [
                             { url: isDog ? DOG_IMAGES[i] : CAT_IMAGES[i - 10] },
                             { url: isDog ? DOG_IMAGES[(i + 1) % 10] : CAT_IMAGES[(i - 9) % 10] }
@@ -124,7 +122,7 @@ async function main() {
     // Creating 12 adoption applications
     const adoptions = await Promise.all(
         Array(12).fill().map(async (_, i) => {
-            return prisma.adopt.create({
+            return prisma.adopts.create({
                 data: {
                     userId: users[Math.floor(Math.random() * users.length)].id,
                     petId: pets[Math.floor(Math.random() * pets.length)].id,
@@ -142,7 +140,7 @@ async function main() {
                     familyMemberCount: 1 + Math.floor(Math.random() * 5),
                     familyAlwaysHome: Math.random() > 0.5,
                     aloneHours: Math.floor(Math.random() * 8),
-                    housingType: ['OWN_HOUSE', 'CONDO', 'APARTMENT'][Math.floor(Math.random() * 3)],
+                    housingType: ['OWN_HOUSE', 'RENTAL_HOUSE', 'CONDO', 'APARTMENT', 'RENTAL_ROOM', 'SINGLE_HOUSE'][Math.floor(Math.random() * 6)],
                     hasGarden: Math.random() > 0.5,
                     hasFence: Math.random() > 0.5,
                     canWalkDog: Math.random() > 0.2,
@@ -158,10 +156,9 @@ async function main() {
         })
     )
 
-    // Creating 10 events
     const events = await Promise.all(
         Array(10).fill().map(async (_, i) => {
-            return prisma.event.create({
+            return prisma.events.create({
                 data: {
                     title_en: `Pet Event ${i + 1}`,
                     title_th: `งานสัตว์เลี้ยง ${i + 1}`,
@@ -171,7 +168,7 @@ async function main() {
                     date_end: new Date(2024, i, 1, 18, 0),
                     status: ['PENDING', 'ACTIVE', 'COMPLETED'][Math.floor(Math.random() * 3)],
                     location: `Venue ${i + 1}, Bangkok`,
-                    images: {
+                    image: {
                         create: [
                             { url: EVENT_IMAGES[i] }
                         ]
@@ -186,13 +183,13 @@ async function main() {
         })
     )
 
-    // Creating volunteer profiles for volunteer users
     const volunteers = await Promise.all(
         users.filter(u => u.role === 'VOLUNTEER').map(async (user, i) => {
-            return prisma.volunteer.create({
+            return prisma.volunteers.create({
                 data: {
                     userId: user.id,
-                    description: `Experienced volunteer ${i + 1}`,
+                    description_en: `Experienced volunteer ${i + 1}`,
+                    description_th: `อาสาสมัครที่มีประสบการณ์ ${i + 1}`,
                     skills: {
                         create: [
                             { name: 'Pet Care' },
@@ -212,23 +209,22 @@ async function main() {
         })
     )
 
-    // Creating 15 donations
     const donations = await Promise.all(
         Array(15).fill().map(async (_, i) => {
-            return prisma.donate.create({
+            return prisma.donates.create({
                 data: {
                     userId: users[Math.floor(Math.random() * users.length)].id,
                     total: 500 + Math.floor(Math.random() * 10000),
-                    payment_method: ['Credit Card', 'Bank Transfer', 'QR Code'][Math.floor(Math.random() * 3)],
+                    payment_method: ['CREDIT', 'PROMPTPAY'][Math.floor(Math.random() * 2)],
                     transaction_id: `TRX${Date.now()}${i}`,
                     is_recurring: Math.random() > 0.7,
-                    receipt_url: `https://example.com/receipt${i + 1}.pdf`
+                    receipt_url: `https://example.com/receipt${i + 1}.pdf`,
+                    status: ['DONE', 'PENDING', 'CANCEL'][Math.floor(Math.random() * 3)]
                 }
             })
         })
     )
 
-    // Creating home images for verification
     const homeImages = await Promise.all(
         Array(10).fill().map(async (_, i) => {
             return prisma.homeImages.create({

@@ -70,10 +70,11 @@ model Pets {
   updated_at      DateTime @updatedAt @db.Timestamp(0)
 
   // Foreign keys and Relations
-  userId    Int?        @map("user_id")
-  User      Users?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   image     PetImages[]
   adoptions Adopts[]    @relation("PetAdoptions")
+  Users     Users?      @relation(fields: [usersId], references: [id])
+  usersId   Int?
 }
 
 enum Gender {
@@ -246,9 +247,9 @@ model Volunteers {
   description_en String?
 
   // Relations
-  user         Users                    @relation(fields: [userId], references: [id])
+  user         Users                     @relation(fields: [userId], references: [id])
   skills       VolunteerSkills[]
-  availability VolunteerAvailabilitys[]
+  availability VolunteerAvailabilities[]
 }
 
 model VolunteerSkills {
@@ -258,7 +259,7 @@ model VolunteerSkills {
   volunteer   Volunteers @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 }
 
-model VolunteerAvailabilitys {
+model VolunteerAvailabilities {
   id          Int        @id @default(autoincrement())
   timeSlot    String     @map("time_slot")
   volunteerId Int        @map("volunteer_id")
