@@ -17,6 +17,7 @@ const paymentRouter = require("./routes/payment-route");
 const petRouter = require("./routes/pet-route");
 const eventRouter = require("./routes/event-route");
 const adminRouter = require("./routes/admin-route");
+const exportRouter = require("./routes/export-route");
 
 
 app.use(morgan("dev"));
@@ -37,6 +38,7 @@ app.use("/event", eventRouter);
 app.use("/payment", paymentRouter);
 app.use("/pet", petRouter)
 app.use("/admin", adminRouter)
+app.use("/export", exportRouter)
 
 
 
