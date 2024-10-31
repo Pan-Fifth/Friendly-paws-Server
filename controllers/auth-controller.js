@@ -122,11 +122,13 @@ exports.loginGoogle = async (req, res, next) => {
         }
 
         const userPayload = {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            firstname: user.firstname,
-            googleId: user.googleId,
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                firstname: user.firstname,
+                googleId: user.googleId,
+            }
         };
 
         const genToken = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1d" });
