@@ -14,25 +14,27 @@ datasource db {
 }
 
 model Users {
-  id               Int              @id @default(autoincrement())
-  email            String           @unique
-  password         String
-  firstname        String?
-  lastname         String?
-  phone            String?
-  resettoken       String?
-  resettokenExpire DateTime?
-  googleId         String?          @unique
-  created_at       DateTime         @default(now()) @db.Timestamp(0)
-  updated_at       DateTime         @updatedAt @db.Timestamp(0)
-  role             Role             @default(USER)
+  id                Int              @id @default(autoincrement())
+  email             String           @unique
+  password          String
+  firstname         String?
+  lastname          String?
+  phone             String?
+  resettoken        String?
+  resettokenExpire  DateTime?
+  googleId          String?          @unique
+  created_at        DateTime         @default(now()) @db.Timestamp(0)
+  updated_at        DateTime         @updatedAt @db.Timestamp(0)
+  role              Role             @default(USER)
   // Relations
-  pets             Pets[]
-  HomeImage        HomeImages[]
-  adoptions        Adopts[]         @relation("UserAdoptions")
-  donations        Donates[]
-  eventAttendees   EventAttendees[]
-  volunteer        Volunteers?
+  pets              Pets[]
+  HomeImage         HomeImages[]
+  adoptions         Adopts[]         @relation("UserAdoptions")
+  donations         Donates[]
+  eventAttendees    EventAttendees[]
+  volunteer         Volunteers?
+  adopts            Adopts[]
+  approvedAdoptions Adopts[]         @relation("ApprovedByAdmin")
 }
 
 enum Role {
@@ -145,8 +147,11 @@ model Adopts {
   created_at         DateTime  @default(now()) @db.Timestamp(0)
 
   // Relations
-  user Users @relation("UserAdoptions", fields: [userId], references: [id])
-  pet  Pets  @relation("PetAdoptions", fields: [petId], references: [id])
+  user            Users  @relation("UserAdoptions", fields: [userId], references: [id])
+  pet             Pets   @relation("PetAdoptions", fields: [petId], references: [id])
+  approvedByAdmin Users? @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
+  Users           Users? @relation(fields: [usersId], references: [id])
+  usersId         Int?
 }
 
 enum HousingType {
