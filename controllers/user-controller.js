@@ -95,3 +95,37 @@ exports.updateDonationStatus = async (req, res) => {
         });
     }
 };
+
+exports.getTotalDonationAmount = async (req, res) => {
+    try {
+        const donationStats = await prisma.donates.groupBy({
+            by: ['status'],
+            _sum: {
+                total: true
+            },
+            _count: true,
+            where: {
+                status: 'DONE'  // Only count completed donations
+            }
+        });
+
+        const totalStats = {
+            totalAmount: donationStats[0]?._sum.total || 0,
+            totalDonations: donationStats[0]?._count || 0,
+            lastUpdated: new Date().toISOString()
+        };
+
+        res.status(200).json({
+            success: true,
+            data: totalStats,
+            message: 'Donation statistics fetched successfully'
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch donation statistics',
+            error: error.message
+        });
+    }
+};
