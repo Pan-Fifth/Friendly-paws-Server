@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
-
 const sendEmailByNodemailer = require('../utils/send-email');
+const { events } = require('../configs/prisma');
+const prisma = require('../configs/prisma');
 
 
 exports.sendEmail = async (req, res) => {
@@ -24,3 +25,5 @@ exports.sendEmail = async (req, res) => {
     }
 
 };
+
+
