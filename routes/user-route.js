@@ -8,11 +8,6 @@ const { authenticate } = require("../middlewares/authenticate");
 
 
 router.post('/send-email', authenticate, sendEmail)
-router.get('/profile', authenticate, getProfile)
-router.patch('/edit-profile/:userId', authenticate, editProfile)
-router.post('/donate',authenticate, donate)
-router.get('/donate', getTotalDonationAmount)
-router.patch('/donate/:id',authenticate, updateDonationStatus)
 
 
 

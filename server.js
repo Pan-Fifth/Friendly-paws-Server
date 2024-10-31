@@ -15,7 +15,7 @@ const authRouter = require("./routes/auth-route");
 const userRouter = require("./routes/user-route");
 const paymentRouter = require("./routes/payment-route");
 const petRouter = require("./routes/pet-route");
-const { authenticate } = require("./middlewares/authenticate");
+const eventRouter = require("./routes/event-route");
 
 
 app.use(morgan("dev"));
@@ -32,6 +32,7 @@ app.use(bodyParser.json());
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/event", eventRouter); 
 app.use("/payment", paymentRouter);
 app.use("/pet", petRouter)
 
