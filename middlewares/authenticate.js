@@ -25,7 +25,7 @@ exports.authenticate = (req, res, next) => {
                 return createError(401, "Token invalid")
             }
 
-            req.user = code
+            req.user = code.user
             next()
         })
     } catch (err) {
