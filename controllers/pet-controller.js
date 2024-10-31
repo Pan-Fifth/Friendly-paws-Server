@@ -32,6 +32,7 @@ exports.aPets =async(req,res,next)=>{
 exports.pet = async(req,res,next)=>{
     try {
         const {id}  = req.params
+        console.log("get pet by id")
         if(!id){
             return createError(400,"pet id not provided")
         }
