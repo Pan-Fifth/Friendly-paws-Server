@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const prisma = require("../configs/prisma")
 const createError = require('../utils/createError');
 
-const prisma = require('../configs/prisma');
 
 const sendEmailByNodemailer = require('../utils/send-email');
 const { getUserProfile, checkUserByUserId } = require('../services/user-service');
