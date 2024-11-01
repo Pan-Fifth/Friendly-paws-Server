@@ -14,7 +14,10 @@ const notFound = require("./middlewares/notFound");
 const authRouter = require("./routes/auth-route");
 const userRouter = require("./routes/user-route");
 const paymentRouter = require("./routes/payment-route");
+const petRouter = require("./routes/pet-route");
+const eventRouter = require("./routes/event-route");
 const adminRouter = require("./routes/admin-route");
+const exportRouter = require("./routes/export-route");
 
 
 app.use(morgan("dev"));
@@ -31,8 +34,11 @@ app.use(bodyParser.json());
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/event", eventRouter);
 app.use("/payment", paymentRouter);
-app.use("/admin", adminRouter);
+app.use("/pet", petRouter)
+app.use("/admin", adminRouter)
+app.use("/export", exportRouter)
 
 
 
