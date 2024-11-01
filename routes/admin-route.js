@@ -15,6 +15,7 @@ router.get('/report-adopt-all', reportAllAdopt);
 
 router.get('/report-donation', reportDonateByDate);
 router.get('/report-donation-all', reportAllDonate);
+router.get('/report-pet-all', reportAllPetList);
 
 router.get('/report-pet-all', reportAllPetList);
 
