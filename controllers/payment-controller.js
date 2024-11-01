@@ -40,7 +40,7 @@ exports.createPayment = async (req, res, next) => {
 exports.confirmPayment = async (req, res, next) => {
     try {
         const { userId, amount, paymentMethod } = req.body;
-
+        console.log(userId, amount, paymentMethod, "this is payment")
         if (!userId || !amount || !paymentMethod) {
             return createError(400, 'Customer ID, amount, and payment method are required');
         }

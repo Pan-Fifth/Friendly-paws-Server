@@ -14,6 +14,7 @@ const notFound = require("./middlewares/notFound");
 const authRouter = require("./routes/auth-route");
 const userRouter = require("./routes/user-route");
 const paymentRouter = require("./routes/payment-route");
+const adminRouter = require("./routes/admin-route");
 
 
 app.use(morgan("dev"));
@@ -31,6 +32,7 @@ app.use(bodyParser.json());
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/payment", paymentRouter);
+app.use("/admin", adminRouter);
 
 
 
