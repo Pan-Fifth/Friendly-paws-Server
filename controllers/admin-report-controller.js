@@ -1,6 +1,6 @@
 const createError = require('../utils/createError')
 const { getChooseEventBydate, getAllEvent, getChooseAdoptBydate, getAllAdopt,
-    getChooseDonateBydate, getAllDonate } = require('../services/admin-report-service')
+    getChooseDonateBydate, getAllDonate, getAllPetList } = require('../services/admin-report-service')
 
 
 exports.reportEventByDate = async (req, res, next) => {
@@ -29,7 +29,7 @@ exports.reportAllEvent = async (req, res, next) => {
         res.json(event);
     } catch (err) {
         console.error("Error in reportAllEvent:", err);
-        res.status(500).json({ message: "Failed to fetch all events", error: err.message });  // เพิ่มการส่งข้อมูลข้อผิดพลาดไปยัง response
+        res.status(500).json({ message: "Failed to fetch all events", error: err.message });
     }
 };
 
@@ -60,7 +60,7 @@ exports.reportAllAdopt = async (req, res, next) => {
         res.json(adopt);
     } catch (err) {
         console.error("Error in reportAllAdopt:", err);
-        res.status(500).json({ message: "Failed to fetch all adopt", error: err.message });  // เพิ่มการส่งข้อมูลข้อผิดพลาดไปยัง response
+        res.status(500).json({ message: "Failed to fetch all adopt", error: err.message });
     }
 };
 
@@ -90,6 +90,15 @@ exports.reportAllDonate = async (req, res, next) => {
         res.json(donation);
     } catch (err) {
         console.error("Error in reportAllDonate:", err);
-        res.status(500).json({ message: "Failed to fetch all donate", error: err.message });  // เพิ่มการส่งข้อมูลข้อผิดพลาดไปยัง response
+        res.status(500).json({ message: "Failed to fetch all donate", error: err.message });
+    }
+};
+exports.reportAllPetList = async (req, res, next) => {
+    try {
+        const pets = await getAllPetList();
+        res.json(pets);
+    } catch (err) {
+        console.error("Error in reportAllPetList:", err);
+        res.status(500).json({ message: "Failed to fetch all pets", error: err.message });
     }
 };

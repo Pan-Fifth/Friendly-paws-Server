@@ -22,6 +22,7 @@ exports.getChooseEventBydate = async (startDate, endDate) => {
                 date_end: true,
                 status: true,
                 location: true,
+                created_at: true,
 
             },
             orderBy: { date_start: 'asc' }
@@ -57,6 +58,7 @@ exports.getAllEvent = async () => {
                 date_end: true,
                 status: true,
                 location: true,
+                created_at: true,
             },
             orderBy: { date_start: 'asc' }
         });
@@ -95,6 +97,7 @@ exports.getChooseAdoptBydate = async (startDate, endDate) => {
                 user: {
                     select: {
                         firstname: true,
+                        phone: true
                     }
                 },
                 approvedByAdmin: {
@@ -145,6 +148,7 @@ exports.getAllAdopt = async () => {
                 user: {
                     select: {
                         firstname: true,
+                        phone: true
                     }
                 },
                 approvedByAdmin: {
@@ -246,5 +250,38 @@ exports.getAllDonate = async () => {
     } catch (error) {
         console.error("Error querying donation:", error);
         throw new Error("Failed to fetch donation");
+    }
+};
+exports.getAllPetList = async () => {
+    try {
+
+        const pets = await prisma.pets.findMany({
+
+            select: {
+                id: true,
+                name_th: true,
+                age: true,
+                color: true,
+                gender: true,
+                type: true,
+                status: true,
+                breed_th: true,
+                description_th: true,
+                medical_history: true,
+                is_vaccinated: true,
+                is_neutered: true,
+                weight: true,
+                created_at: true,
+
+            },
+            orderBy: { created_at: 'asc' }
+        });
+
+        console.log("pets Found:", pets);
+        return pets;
+
+    } catch (error) {
+        console.error("Error querying pets:", error);
+        throw new Error("Failed to fetch pets");
     }
 };
