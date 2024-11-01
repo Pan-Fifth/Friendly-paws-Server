@@ -8,8 +8,7 @@ const createError = require('../utils/createError');
 // ฟังก์ชันดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ Admin เท่านั้น)
 const getAllUsers = async (req, res, next) => {
   try {
-    // console.log(req.user,"req user")
-    // // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
+    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
     // if (req.user.role !== 'ADMIN') {
     //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
     // }
@@ -70,32 +69,30 @@ const sendNotificationEmail = async (userEmail, subject, message) => {
   await transporter.sendMail(mailOptions);
 };
 
-
-
-
+// ฟังก์ชันลบผู้ใช้ตาม ID (เฉพาะ Admin เท่านั้น)
 const deleteUserById = async (req, res, next) => {
-    const { id } = req.params;
-  
-    try {
-      // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
-      // if (req.user.role !== 'ADMIN') {
-      //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
-      // }
-  
-      // ลบข้อมูลผู้ใช้
-      await prisma.users.delete({
-        where: { id: parseInt(id) },
-      });
-  
-      res.status(204).send(); // ส่งสถานะ 204 No Content หลังจากลบสำเร็จ
-    } catch (error) {
-      next(createError(500, 'Failed to delete user.'));
-    }
-  };
-  
-  module.exports = {
-    getAllUsers,
-    updateUserById,
-    sendNotificationEmail,
-    deleteUserById, // เพิ่มฟังก์ชันที่ลบผู้ใช้
-  };
+  const { id } = req.params;
+
+  try {
+    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
+    // if (req.user.role !== 'ADMIN') {
+    //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
+    // }
+
+    // ลบข้อมูลผู้ใช้
+    await prisma.users.delete({
+      where: { id: parseInt(id) },
+    });
+
+    res.status(204).send(); // ส่งสถานะ 204 No Content หลังจากลบสำเร็จ
+  } catch (error) {
+    next(createError(500, 'Failed to delete user.'));
+  }
+};
+
+module.exports = {
+  getAllUsers,
+  updateUserById,
+  sendNotificationEmail,
+  deleteUserById, // เพิ่มฟังก์ชันที่ลบผู้ใช้
+};
