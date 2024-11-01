@@ -1,4 +1,7 @@
 const prisma = require("../configs/prisma")
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const createError = require('../utils/createError');
 
 module.exports.getDashboard = async (req, res, next) => {
     try {
@@ -206,13 +209,10 @@ module.exports.getDashboard = async (req, res, next) => {
 
 // admin-controller.js
 
-const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
-const prisma = require("../configs/prisma");
-const createError = require('../utils/createError');
+
 
 // ฟังก์ชันดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ Admin เท่านั้น)
-const getAllUsers = async (req, res, next) => {
+module.exports.getAllUsers = async (req, res, next) => {
   try {
     // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
     // if (req.user.role !== 'ADMIN') {
@@ -227,7 +227,7 @@ const getAllUsers = async (req, res, next) => {
 };
 
 // ฟังก์ชันแก้ไขข้อมูลผู้ใช้เฉพาะ Admin เท่านั้น
-const updateUserById = async (req, res, next) => {
+module.exports.updateUserById = async (req, res, next) => {
   const { id } = req.params;
   const { email, firstname, lastname, phone, role } = req.body;
 
@@ -256,7 +256,7 @@ const updateUserById = async (req, res, next) => {
 };
 
 // ฟังก์ชันส่งอีเมลยืนยันการดำเนินการสำหรับผู้ใช้
-const sendNotificationEmail = async (userEmail, subject, message) => {
+module.exports.sendNotificationEmail = async (userEmail, subject, message) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -276,7 +276,7 @@ const sendNotificationEmail = async (userEmail, subject, message) => {
 };
 
 // ฟังก์ชันลบผู้ใช้ตาม ID (เฉพาะ Admin เท่านั้น)
-const deleteUserById = async (req, res, next) => {
+module.exports.deleteUserById = async (req, res, next) => {
   const { id } = req.params;
 
   try {
@@ -294,11 +294,4 @@ const deleteUserById = async (req, res, next) => {
   } catch (error) {
     next(createError(500, 'Failed to delete user.'));
   }
-};
-
-module.exports = {
-  getAllUsers,
-  updateUserById,
-  sendNotificationEmail,
-  deleteUserById, // เพิ่มฟังก์ชันที่ลบผู้ใช้
 };
