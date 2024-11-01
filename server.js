@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/payment", paymentRouter);
-app.use("/pet", petRouter)
+app.use("/pet",petRouter)
 
 
 

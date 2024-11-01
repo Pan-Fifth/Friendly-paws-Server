@@ -77,3 +77,69 @@ exports.pet = async(req,res,next)=>{
     }   
 
 }
+
+exports.createAdoptRequest= async(req,res,next)=>{
+    try {
+        
+        const{userId,petId,firstname,lastname,phone,email,address,career,workTime,workPlace,dayOff,salary,dateOfBirth,socialContact,currentPetCount,currentPetDetails,familyMemberCount,familyAlwaysHome,aloneHours,housingType,hasGarden,hasFence,canWalkDog,deliveryType,notes,}=req.input 
+        console.log(req.input)
+        const hasAdopt = await prisma.adopts.findFirst({
+            where:{
+                userId: +userId,
+                petId: +petId
+            }
+        })
+        if(hasAdopt){
+            return createError(400,"This pet you already has a request")
+        }
+        const user = await prisma.users.findFirst({
+            where:{
+                id: userId
+            }
+        })
+        if(!user){
+            return createError(400,"This user not found")
+        }
+        const updateUser = await prisma.users.update({
+            where:{
+                id: userId
+            },
+            data:{
+                firstname,
+                lastname,
+                phone,
+                email,
+            }
+        })
+        const data ={
+                userId,
+                petId,
+                address,
+                career,
+                workTime,
+                workPlace,
+                dayOff,
+                salary,
+                dateOfBirth,
+                socialContact,
+                currentPetCount,
+                currentPetDetails,
+                familyMemberCount,
+                familyAlwaysHome,
+                aloneHours,
+                housingType,
+                hasGarden,
+                hasFence,
+                canWalkDog,
+                deliveryType,
+                notes,
+            }
+        const createAdoptRequest = await prisma.adopts.create({
+            data:data
+        })
+        res.json({updateUser,createAdoptRequest})
+    
+    } catch (err) {
+        next(err)
+    }
+}
