@@ -1,215 +1,9 @@
-const prisma = require("../configs/prisma")
-const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
-const createError = require('../utils/createError');
-
-module.exports.getDashboard = async (req, res, next) => {
-    try {
-      // Get current date and 6 months ago date
-      const now = new Date()
-      const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6))
-  
-      // Get total counts
-      const [
-        totalUsers,
-        totalPets,
-        totalAdoptions,
-        totalDonations,
-        totalEvents,
-        totalVolunteers
-      ] = await Promise.all([
-        prisma.users.count(),
-        prisma.pets.count(),
-        prisma.adopts.count(),
-        prisma.donates.count(),
-        prisma.events.count(),
-        prisma.volunteers.count()
-      ])
-  
-      // Get monthly statistics for last 6 months
-      const monthlyAdoptions = await prisma.adopts.groupBy({
-        by: ['created_at'],
-        where: {
-          created_at: {
-            gte: sixMonthsAgo
-          }
-        },
-        _count: true,
-        orderBy: {
-          created_at: 'asc'
-        }
-      })
-  
-      const monthlyDonations = await prisma.donates.groupBy({
-        by: ['created_at'],
-        where: {
-          created_at: {
-            gte: sixMonthsAgo
-          }
-        },
-        _sum: {
-          total: true
-        },
-        orderBy: {
-          created_at: 'asc'
-        }
-      })
-  
-      // Get recent activities
-      const recentActivities = await Promise.all([
-        // Recent adoptions
-        prisma.adopts.findMany({
-          take: 5,
-          orderBy: { created_at: 'desc' },
-          include: {
-            user: {
-              select: {
-                firstname: true,
-                lastname: true
-              }
-            },
-            pet: {
-              select: {
-                name_en: true,
-                name_th: true
-              }
-            }
-          }
-        }),
-        // Recent donations
-        prisma.donates.findMany({
-          take: 5,
-          orderBy: { created_at: 'desc' },
-          include: {
-            user: {
-              select: {
-                firstname: true,
-                lastname: true
-              }
-            }
-          }
-        }),
-        // Recent events
-        prisma.events.findMany({
-          take: 5,
-          orderBy: { created_at: 'desc' },
-          include: {
-            attendees: {
-              select: {
-                userId: true
-              }
-            }
-          }
-        })
-      ])
-  
-      // Get pets status distribution
-      const petsStatusDistribution = await prisma.pets.groupBy({
-        by: ['status'],
-        _count: true
-      })
-  
-      res.json({
-        overview: {
-          totalUsers,
-          totalPets,
-          totalAdoptions,
-          totalDonations,
-          totalEvents,
-          totalVolunteers
-        },
-        monthlyStats: {
-          adoptions: monthlyAdoptions,
-          donations: monthlyDonations
-        },
-        recentActivities: {
-          adoptions: recentActivities[0],
-          donations: recentActivities[1],
-          events: recentActivities[2]
-        },
-        petsStatusDistribution
-      })
-  
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  module.exports.getDonation = async (req, res, next) => {
-    try {
-        const { startDate, endDate, page = 1, limit = 20 } = req.query
-        
-        const skip = (page - 1) * parseInt(limit)
-        
-        const where = {
-            created_at: {
-                gte: startDate ? new Date(startDate) : new Date(new Date().setMonth(new Date().getMonth() - 1)),
-                lte: endDate ? new Date(endDate) : new Date()
-            }
-        }
-
-        const [donations, total] = await Promise.all([
-            prisma.donates.findMany({
-                where,
-                include: {
-                    user: {
-                        select: {
-                            firstname: true,
-                            lastname: true
-                        }
-                    }
-                },
-                skip,
-                take: parseInt(limit),
-                orderBy: {
-                    created_at: 'desc'
-                }
-            }),
-            prisma.donates.count({ where })
-        ])
-
-        res.json({
-            donations,
-            pagination: {
-                total,
-                pages: Math.ceil(total / limit),
-                currentPage: parseInt(page)
-            }
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-  module.exports.updateDonation = async (req, res, next) => {
-    try {
-        const { id } = req.params
-        const { status } = req.body
-
-        const updatedDonation = await prisma.donates.update({
-            where: { id: parseInt(id) },
-            data: { status },
-            include: {
-                user: {
-                    select: {
-                        firstname: true,
-                        lastname: true
-                    }
-                }
-            }
-        })
-
-        res.json(updatedDonation)
-    } catch (error) {
-        next(error)
-    }
-}
-
-
-  
 
 // admin-controller.js
-
-
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const prisma = require("../configs/prisma");
+const createError = require('../utils/createError');
 
 // ฟังก์ชันดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ Admin เท่านั้น)
 module.exports.getAllUsers = async (req, res, next) => {
@@ -225,6 +19,7 @@ module.exports.getAllUsers = async (req, res, next) => {
     next(createError(500, 'Failed to retrieve users.'));
   }
 };
+
 
 // ฟังก์ชันแก้ไขข้อมูลผู้ใช้เฉพาะ Admin เท่านั้น
 module.exports.updateUserById = async (req, res, next) => {
@@ -254,6 +49,7 @@ module.exports.updateUserById = async (req, res, next) => {
     next(createError(500, 'Failed to update user.'));
   }
 };
+
 
 // ฟังก์ชันส่งอีเมลยืนยันการดำเนินการสำหรับผู้ใช้
 module.exports.sendNotificationEmail = async (userEmail, subject, message) => {
@@ -295,3 +91,205 @@ module.exports.deleteUserById = async (req, res, next) => {
     next(createError(500, 'Failed to delete user.'));
   }
 };
+
+module.exports.getDashboard = async (req, res, next) => {
+  try {
+    // Get current date and 6 months ago date
+    const now = new Date()
+    const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6))
+
+    // Get total counts
+    const [
+      totalUsers,
+      totalPets,
+      totalAdoptions,
+      totalDonations,
+      totalEvents,
+      totalVolunteers
+    ] = await Promise.all([
+      prisma.users.count(),
+      prisma.pets.count(),
+      prisma.adopts.count(),
+      prisma.donates.count(),
+      prisma.events.count(),
+      prisma.volunteers.count()
+    ])
+
+    // Get monthly statistics for last 6 months
+    const monthlyAdoptions = await prisma.adopts.groupBy({
+      by: ['created_at'],
+      where: {
+        created_at: {
+          gte: sixMonthsAgo
+        }
+      },
+      _count: true,
+      orderBy: {
+        created_at: 'asc'
+      }
+    })
+
+    const monthlyDonations = await prisma.donates.groupBy({
+      by: ['created_at'],
+      where: {
+        created_at: {
+          gte: sixMonthsAgo
+        }
+      },
+      _sum: {
+        total: true
+      },
+      orderBy: {
+        created_at: 'asc'
+      }
+    })
+
+    // Get recent activities
+    const recentActivities = await Promise.all([
+      // Recent adoptions
+      prisma.adopts.findMany({
+        take: 5,
+        orderBy: { created_at: 'desc' },
+        include: {
+          user: {
+            select: {
+              firstname: true,
+              lastname: true
+            }
+          },
+          pet: {
+            select: {
+              name_en: true,
+              name_th: true
+            }
+          }
+        }
+      }),
+      // Recent donations
+      prisma.donates.findMany({
+        take: 5,
+        orderBy: { created_at: 'desc' },
+        include: {
+          user: {
+            select: {
+              firstname: true,
+              lastname: true
+            }
+          }
+        }
+      }),
+      // Recent events
+      prisma.events.findMany({
+        take: 5,
+        orderBy: { created_at: 'desc' },
+        include: {
+          attendees: {
+            select: {
+              userId: true
+            }
+          }
+        }
+      })
+    ])
+
+    // Get pets status distribution
+    const petsStatusDistribution = await prisma.pets.groupBy({
+      by: ['status'],
+      _count: true
+    })
+
+    res.json({
+      overview: {
+        totalUsers,
+        totalPets,
+        totalAdoptions,
+        totalDonations,
+        totalEvents,
+        totalVolunteers
+      },
+      monthlyStats: {
+        adoptions: monthlyAdoptions,
+        donations: monthlyDonations
+      },
+      recentActivities: {
+        adoptions: recentActivities[0],
+        donations: recentActivities[1],
+        events: recentActivities[2]
+      },
+      petsStatusDistribution
+    })
+
+  } catch (error) {
+    next(error)
+  }
+}
+
+module.exports.getDonation = async (req, res, next) => {
+  try {
+    const { startDate, endDate, page = 1, limit = 20 } = req.query
+
+    const skip = (page - 1) * parseInt(limit)
+
+    const where = {
+      created_at: {
+        gte: startDate ? new Date(startDate) : new Date(new Date().setMonth(new Date().getMonth() - 1)),
+        lte: endDate ? new Date(endDate) : new Date()
+      }
+    }
+
+    const [donations, total] = await Promise.all([
+      prisma.donates.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              firstname: true,
+              lastname: true
+            }
+          }
+        },
+        skip,
+        take: parseInt(limit),
+        orderBy: {
+          created_at: 'desc'
+        }
+      }),
+      prisma.donates.count({ where })
+    ])
+
+    res.json({
+      donations,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        currentPage: parseInt(page)
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+module.exports.updateDonation = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { status } = req.body
+
+    const updatedDonation = await prisma.donates.update({
+      where: { id: parseInt(id) },
+      data: { status },
+      include: {
+        user: {
+          select: {
+            firstname: true,
+            lastname: true
+          }
+        }
+      }
+    })
+
+    res.json(updatedDonation)
+  } catch (error) {
+    next(error)
+  }
+}
+
