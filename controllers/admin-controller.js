@@ -97,6 +97,9 @@ module.exports = {
   sendNotificationEmail,
   deleteUserById, // เพิ่มฟังก์ชันที่ลบผู้ใช้
 };
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const createError = require('../utils/createError');
 
 module.exports.getDashboard = async (req, res, next) => {
   try {
@@ -298,3 +301,95 @@ module.exports.updateDonation = async (req, res, next) => {
     next(error)
   }
 }
+
+
+
+
+// admin-controller.js
+
+
+
+// ฟังก์ชันดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ Admin เท่านั้น)
+module.exports.getAllUsers = async (req, res, next) => {
+  try {
+    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
+    // if (req.user.role !== 'ADMIN') {
+    //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
+    // }
+
+    const users = await prisma.users.findMany();
+    res.json(users);
+  } catch (error) {
+    next(createError(500, 'Failed to retrieve users.'));
+  }
+};
+
+// ฟังก์ชันแก้ไขข้อมูลผู้ใช้เฉพาะ Admin เท่านั้น
+module.exports.updateUserById = async (req, res, next) => {
+  const { id } = req.params;
+  const { email, firstname, lastname, phone, role } = req.body;
+
+  try {
+    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
+    // if (req.user.role !== 'ADMIN') {
+    //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
+    // }
+
+    // อัปเดตข้อมูลผู้ใช้
+    const updatedUser = await prisma.users.update({
+      where: { id: parseInt(id) },
+      data: {
+        email,
+        firstname,
+        lastname,
+        phone,
+        role, // Admin สามารถแก้ไข role ได้
+      },
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    next(createError(500, 'Failed to update user.'));
+  }
+};
+
+// ฟังก์ชันส่งอีเมลยืนยันการดำเนินการสำหรับผู้ใช้
+module.exports.sendNotificationEmail = async (userEmail, subject, message) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: userEmail,
+    subject,
+    text: message,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// ฟังก์ชันลบผู้ใช้ตาม ID (เฉพาะ Admin เท่านั้น)
+module.exports.deleteUserById = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
+    // if (req.user.role !== 'ADMIN') {
+    //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
+    // }
+
+    // ลบข้อมูลผู้ใช้
+    await prisma.users.delete({
+      where: { id: parseInt(id) },
+    });
+
+    res.status(204).send(); // ส่งสถานะ 204 No Content หลังจากลบสำเร็จ
+  } catch (error) {
+    next(createError(500, 'Failed to delete user.'));
+  }
+};
