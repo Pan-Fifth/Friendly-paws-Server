@@ -1,104 +1,98 @@
-const prisma = require("../configs/prisma")
+// admin-controller.js
 
-exports.getDashboard = async (req, res, next) => {
-    try {
-        // Get total counts
-        const users = await prisma.users.count({
-            where: { role: "USER" }
-        });
-        
-        const pets = await prisma.pets.count();
-        
-        const adoptions = await prisma.adopts.count();
-        
-        const volunteers = await prisma.volunteers.count();
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const prisma = require("../configs/prisma");
+const createError = require('../utils/createError');
 
-        // Get donation statistics for the last 6 months
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+// ฟังก์ชันดึงข้อมูลผู้ใช้ทั้งหมด (เฉพาะ Admin เท่านั้น)
+const getAllUsers = async (req, res, next) => {
+  try {
+    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
+    // if (req.user.role !== 'ADMIN') {
+    //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
+    // }
 
-        const donations = await prisma.donates.groupBy({
-            by: ['created_at'],
-            where: {
-                created_at: {
-                    gte: sixMonthsAgo
-                },
-                status: 'DONE'
-            },
-            _sum: {
-                total: true
-            },
-            orderBy: {
-                created_at: 'asc'
-            }
-        });
+    const users = await prisma.users.findMany();
+    res.json(users);
+  } catch (error) {
+    next(createError(500, 'Failed to retrieve users.'));
+  }
+};
 
-        // Get adoption status breakdown
-        const adoptionStatus = await prisma.pets.groupBy({
-            by: ['status'],
-            _count: true
-        });
+// ฟังก์ชันแก้ไขข้อมูลผู้ใช้เฉพาะ Admin เท่านั้น
+const updateUserById = async (req, res, next) => {
+  const { id } = req.params;
+  const { email, firstname, lastname, phone, role } = req.body;
 
-        // Get recent donations
-        const recentDonations = await prisma.donates.findMany({
-            take: 5,
-            orderBy: {
-                created_at: 'desc'
-            },
-            include: {
-                user: {
-                    select: {
-                        firstname: true,
-                        lastname: true,
-                        email: true
-                    }
-                }
-            }
-        });
+  try {
+    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
+    // if (req.user.role !== 'ADMIN') {
+    //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
+    // }
 
-        // Get pending adoptions
-        const pendingAdoptions = await prisma.adopts.findMany({
-            where: {
-                status: 'PENDING'
-            },
-            take: 5,
-            include: {
-                user: {
-                    select: {
-                        firstname: true,
-                        lastname: true,
-                        email: true
-                    }
-                },
-                pet: {
-                    select: {
-                        name_en: true,
-                        type: true
-                    }
-                }
-            },
-            orderBy: {
-                created_at: 'desc'
-            }
-        });
+    // อัปเดตข้อมูลผู้ใช้
+    const updatedUser = await prisma.users.update({
+      where: { id: parseInt(id) },
+      data: {
+        email,
+        firstname,
+        lastname,
+        phone,
+        role, // Admin สามารถแก้ไข role ได้
+      },
+    });
 
-        res.status(200).json({
-            success: true,
-            data: {
-                overview: {
-                    totalUsers: users,
-                    totalPets: pets,
-                    totalAdoptions: adoptions,
-                    totalVolunteers: volunteers
-                },
-                donationStats: donations,
-                adoptionStatus,
-                recentDonations,
-                pendingAdoptions
-            }
-        });
+    res.json(updatedUser);
+  } catch (error) {
+    next(createError(500, 'Failed to update user.'));
+  }
+};
 
-    } catch (err) {
-        next(err);
-    }
-}
+// ฟังก์ชันส่งอีเมลยืนยันการดำเนินการสำหรับผู้ใช้
+const sendNotificationEmail = async (userEmail, subject, message) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: userEmail,
+    subject,
+    text: message,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// ฟังก์ชันลบผู้ใช้ตาม ID (เฉพาะ Admin เท่านั้น)
+const deleteUserById = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
+    // if (req.user.role !== 'ADMIN') {
+    //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
+    // }
+
+    // ลบข้อมูลผู้ใช้
+    await prisma.users.delete({
+      where: { id: parseInt(id) },
+    });
+
+    res.status(204).send(); // ส่งสถานะ 204 No Content หลังจากลบสำเร็จ
+  } catch (error) {
+    next(createError(500, 'Failed to delete user.'));
+  }
+};
+
+module.exports = {
+  getAllUsers,
+  updateUserById,
+  sendNotificationEmail,
+  deleteUserById, // เพิ่มฟังก์ชันที่ลบผู้ใช้
+};
