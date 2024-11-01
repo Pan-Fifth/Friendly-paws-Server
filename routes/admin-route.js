@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { reportEventByDate, reportAllEvent, reportAdoptByDate,
     reportAllAdopt, reportDonateByDate, reportAllDonate } = require('../controllers/admin-report-controler');
+    const { getDashboard } = require('../controllers/admin-controller');
 
 
 router.get('/report-event', reportEventByDate)
