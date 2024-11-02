@@ -101,7 +101,8 @@ exports.loginGoogle = async (req, res, next) => {
         const googleId = payloadFromGoogle['sub'];
         const email = payloadFromGoogle['email'];
         const firstname = payloadFromGoogle.given_name || payloadFromGoogle.name.split(' ')[0];
-
+        const lastname = payloadFromGoogle.family_name
+        console.log('payloadFromGoogle :>> ', payloadFromGoogle);
         let user = await getUserByEmail(email);
 
         if (!user) {
@@ -110,13 +111,16 @@ exports.loginGoogle = async (req, res, next) => {
                 googleId,
                 email,
                 firstname,
+                lastname,
             });
         } else if (!user.googleId || !user.firstname) {
             // ถ้ามีผู้ใช้แล้ว แต่ไม่มี googleId หรือ firstname ให้ทำการอัปเดต
             const dataToUpdate = {
                 googleId: user.googleId || googleId,
                 firstname: user.firstname || firstname,
+                lastname: user.lastname || lastname
             };
+            console.log(dataToUpdate, "dataToUpdate")
             await updateUser(user.id, dataToUpdate);
             user = await getUserByEmail(email); // รีเฟรชข้อมูลผู้ใช้หลังการอัปเดต
         }
@@ -127,12 +131,13 @@ exports.loginGoogle = async (req, res, next) => {
                 email: user.email,
                 role: user.role,
                 firstname: user.firstname,
+                lastname: user.lastname,
                 googleId: user.googleId,
             }
         };
 
         const genToken = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1d" });
-        console.log("Payload sent to frontend:", userPayload);
+
 
         res.status(200).json({
             message: 'Login successful',

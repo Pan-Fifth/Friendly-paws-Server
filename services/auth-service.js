@@ -36,7 +36,8 @@ exports.createGoogleUser = async (data) => {
             googleId: data.googleId,
             email: data.email,
             password: '',
-            firstname: data.firstname
+            firstname: data.firstname,
+            lastname: data.lastname,
         },
     });
 };
