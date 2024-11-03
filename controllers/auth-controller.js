@@ -152,18 +152,39 @@ exports.loginGoogle = async (req, res, next) => {
 };
 
 
+const sendResetEmail = async (email, token) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
 
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Reset Your Password',
+        text: `Click this link to reset your password.: http://localhost:5173/auth/reset-password/${token}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
 
 exports.forgetPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
+        console.log(email, "email backend")
         const user = await getUserByEmail(email)
+        console.log('user forgetpass :>> ', user);
         if (!user) {
             return createError(404, 'email not found');
         }
 
         const token = crypto.randomBytes(20).toString('hex');
         const expiry = new Date(Date.now() + 3600000);
+        console.log('Generated token and expiry:', token, expiry);
 
         await prisma.users.update({
             where: { email },
@@ -174,6 +195,7 @@ exports.forgetPassword = async (req, res, next) => {
         });
 
         await sendResetEmail(email, token);
+        console.log('Reset email sent successfully');
 
         res.json({ message: 'The password reset link has been sent to your email.', tokenEmail: token });
     } catch (error) {
