@@ -91,6 +91,8 @@ const adoptValidationSchema = Joi.object({
     
       // Optional fields
       notes: Joi.string().allow(null),
+
+      files: Joi.string() 
     });
 
 const validateSchema = (schema) => (req, res, next) => {

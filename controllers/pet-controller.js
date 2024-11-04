@@ -1,6 +1,8 @@
 const { date } = require('joi')
 const prisma = require('../configs/prisma')
 const createError = require('../utils/createError')
+const cloudinary = require('../configs/cloudinary')
+const fs = require('fs/promises')
 
 exports.aPets =async(req,res,next)=>{
     try {
@@ -22,7 +24,13 @@ exports.aPets =async(req,res,next)=>{
                 }
             },
         })
-        console.log("getApets")
+        // allAvaiPets.map((petInfo)=>{
+        //     const birthDay = petInfo.age 
+        //     const age = (new Date() - birthDay)/86400000
+        //     petInfo.birthDay = birthDay
+        //     petInfo.age = age
+        // })
+        // console.log("getApets")
         res.json(allAvaiPets)
     } catch (err) {
         next(err)
@@ -80,9 +88,8 @@ exports.pet = async(req,res,next)=>{
 
 exports.createAdoptRequest= async(req,res,next)=>{
     try {
-        
-        const{userId,petId,firstname,lastname,phone,email,address,career,workTime,workPlace,dayOff,salary,dateOfBirth,socialContact,currentPetCount,currentPetDetails,familyMemberCount,familyAlwaysHome,aloneHours,housingType,hasGarden,hasFence,canWalkDog,deliveryType,notes,}=req.input 
-        console.log(req.input)
+        const{userId,petId,firstname,lastname,phone,email,address,career,workTime,workPlace,dayOff,salary,dateOfBirth,socialContact,currentPetCount,currentPetDetails,familyMemberCount,familyAlwaysHome,aloneHours,housingType,hasGarden,hasFence,canWalkDog,deliveryType,notes}=req.input 
+        console.log("req input",req.input)
         const hasAdopt = await prisma.adopts.findFirst({
             where:{
                 userId: +userId,
@@ -137,9 +144,34 @@ exports.createAdoptRequest= async(req,res,next)=>{
         const createAdoptRequest = await prisma.adopts.create({
             data:data
         })
-        res.json({updateUser,createAdoptRequest})
+        console.log(userId)
+        console.log(req.files)
+
+
+        if(req.files.length < 1){
+            return createError(400,"no file given")
+        }
+        const imagePromiseArray =[]
+        for(let file of req.files){
+            const promiseUrl = cloudinary.uploader.upload(file.path)
+            imagePromiseArray.push(promiseUrl)
+        }
+        const imageArray =await Promise.all(imagePromiseArray)
+
+        const homePics = await prisma.homeImages.createMany({
+            data: imageArray.map((el)=>({
+                        userId: +userId,
+                        url:el.secure_url
+                    }))
+            
+        })
+
+        res.json(updateUser,createAdoptRequest,homePics)
     
     } catch (err) {
         next(err)
+    } finally{
+        const deleteFile = req.files.map((file)=>fs.unlink(file.path))
+        await Promise.all(deleteFile)
     }
 }
