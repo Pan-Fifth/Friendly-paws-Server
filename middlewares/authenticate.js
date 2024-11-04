@@ -26,6 +26,7 @@ exports.authenticate = (req, res, next) => {
             }
 
             req.user = code.user
+            
             next()
         })
     } catch (err) {
