@@ -45,16 +45,18 @@ exports.regisEvent = async (req, res, next) => {
     try {
 
         const userId = req.user
+        console.log('userId',userId)
         const { eventId } = req.body;
+        console.log("eventId",eventId)
         const event = await prisma.events.findFirst({
             where: {
-                id: +eventId,
+                id: 3
             }
         });
         if (!event) {
             return createError(400, "event not found");
         }
-        const haveRegis = await prisma.EventAttendees.findFirst({
+        const haveRegis = await prisma.eventAttendees.findFirst({
             where: {
                 userId: +userId.user.id,
                 eventId: +eventId,
@@ -64,12 +66,13 @@ exports.regisEvent = async (req, res, next) => {
             return createError(400, "user already register event");
         }
         console.log("----", event)
-        const regisEvent = await prisma.EventAttendees.create({
+        const regisEvent = await prisma.eventAttendees.create({
             data: {
                 userId: +userId.user.id,
                 eventId: +eventId,
             }
         });
+        console.log("regisEvent--->",regisEvent)
         res.status(200).json({ message: "regisEvent success", regisEvent });
     } catch (error) {
         console.log(error)
