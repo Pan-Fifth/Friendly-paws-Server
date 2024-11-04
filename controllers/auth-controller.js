@@ -1,5 +1,3 @@
-
-
 const prisma = require("../configs/prisma")
 const bcryptjs = require("bcryptjs")
 const jwt = require("jsonwebtoken")

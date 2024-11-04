@@ -7,6 +7,11 @@ exports.eventShowPages = async (req, res) => {
     try {
 
         const today = new Date();
+        const allEvent = await prisma.events.findMany({
+            include:{
+                image: true,
+            }
+        });
         const pastEvent = await prisma.events.findMany({
             where: {
                 date_start: {
@@ -27,8 +32,8 @@ exports.eventShowPages = async (req, res) => {
                 image: true,
             }
         });
-        res.status(200).json({ events, pastEvent });
-    } catch (error) {
+        res.status(200).json({ events,pastEvent,allEvent });
+    } catch(error) {
         res.status(500).json({ message: "eventShowPages error", error: error.message });
     }
 }
@@ -73,6 +78,26 @@ exports.regisEvent = async (req, res, next) => {
     }
 }
 
+exports.createEvent = async (req, res, next) => {
+    try{
+        const { title, date_start, date_end, description, location, image } = req.body;
+        const userId = req.user
+        const event = await prisma.events.create({
+            data: {
+                title,
+                date_start,
+                date_end,
+                description,
+                location,
+                image,
+                userId: +userId.user.id,
+            }
+        });
+        res.status(200).json({ message: "createEvent success", event });
+    } catch(error) {
+        next(error);
+    }
+}
 
 // สำหรับเปลี่ยนภาษาห้ามมลบบบบ
 // exports.eventShowPages = async (req, res) => {
