@@ -13,12 +13,12 @@ const { getUserByEmail, createNewUser, findUserByGoogleId, createGoogleUser, upd
 exports.register = async (req, res, next) => {
 
     try {
-
+      
         const { email, password } = req.body
 
 
         const checkEmail = await getUserByEmail(email)
-
+        
         if (checkEmail) {
 
             return createError(400, "Email already exist!!")
@@ -39,7 +39,7 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
 
     try {
-
+        
         const { email, password } = req.body
 
 
