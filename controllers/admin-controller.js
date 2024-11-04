@@ -97,7 +97,7 @@ module.exports.getDashboard = async (req, res, next) => {
     // Get current date and 6 months ago date
     const now = new Date()
     const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6))
-    
+
     // Get start of current year for YTD calculation
     const startOfYear = new Date(now.getFullYear(), 0, 1)
 
@@ -314,8 +314,8 @@ module.exports.updateDonation = async (req, res, next) => {
 
 module.exports.getDonationGoals = async (req, res) => {
   const { year } = req.query
-  console.log("get year",year)
-  const goals = await prisma.donationGoals.findUnique({
+  console.log("get year", year)
+  const goals = await prisma.donationGoals.findFirst({
     where: {
       year: parseInt(year)
     }
@@ -326,7 +326,7 @@ module.exports.getDonationGoals = async (req, res) => {
 module.exports.updateDonationGoals = async (req, res) => {
   const { year } = req.params
   const { targetAmount, targetPets, petsHelped } = req.body
-  
+
   const updatedGoals = await prisma.donationGoals.upsert({
     where: {
       year: parseInt(year)
@@ -343,6 +343,6 @@ module.exports.updateDonationGoals = async (req, res) => {
       petsHelped
     }
   })
-  
+
   return res.status(200).json(updatedGoals)
 }
