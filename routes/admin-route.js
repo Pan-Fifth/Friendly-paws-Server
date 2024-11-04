@@ -4,7 +4,7 @@ const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/
 
 const { reportEventByDate, reportAllEvent, reportAdoptByDate,
     reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList } = require('../controllers/admin-report-controller');
-const { getDashboard, getDonation, updateDonation } = require('../controllers/admin-controller');
+const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require('../controllers/admin-controller');
 
 
 router.get('/report-event', reportEventByDate);
@@ -30,5 +30,8 @@ router.get('/dashboard', getDashboard)
 router.get('/manage-donation', getDonation)
 router.put('/manage-donation/:id', updateDonation)
 
+
+router.get('/', getDonationGoals)
+router.put('/:year', updateDonationGoals)
 
 module.exports = router;

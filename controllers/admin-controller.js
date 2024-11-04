@@ -97,6 +97,22 @@ module.exports.getDashboard = async (req, res, next) => {
     // Get current date and 6 months ago date
     const now = new Date()
     const sixMonthsAgo = new Date(now.setMonth(now.getMonth() - 6))
+    
+    // Get start of current year for YTD calculation
+    const startOfYear = new Date(now.getFullYear(), 0, 1)
+
+    // Get total YTD donations
+    const ytdDonations = await prisma.donates.aggregate({
+      where: {
+        created_at: {
+          gte: startOfYear,
+        },
+        status: 'DONE'
+      },
+      _sum: {
+        total: true
+      }
+    })
 
     // Get total counts
     const [
@@ -148,7 +164,7 @@ module.exports.getDashboard = async (req, res, next) => {
     const recentActivities = await Promise.all([
       // Recent adoptions
       prisma.adopts.findMany({
-        take: 5,
+        take: 20,
         orderBy: { created_at: 'desc' },
         include: {
           user: {
@@ -205,7 +221,8 @@ module.exports.getDashboard = async (req, res, next) => {
         totalAdoptions,
         totalDonations,
         totalEvents,
-        totalVolunteers
+        totalVolunteers,
+        ytdDonationsAmount: ytdDonations._sum.total || 0
       },
       monthlyStats: {
         adoptions: monthlyAdoptions,
@@ -223,6 +240,7 @@ module.exports.getDashboard = async (req, res, next) => {
     next(error)
   }
 }
+
 
 module.exports.getDonation = async (req, res, next) => {
   try {
@@ -293,3 +311,38 @@ module.exports.updateDonation = async (req, res, next) => {
   }
 }
 
+
+module.exports.getDonationGoals = async (req, res) => {
+  const { year } = req.query
+  console.log("get year",year)
+  const goals = await prisma.donationGoals.findUnique({
+    where: {
+      year: parseInt(year)
+    }
+  })
+  return res.status(200).json(goals)
+}
+
+module.exports.updateDonationGoals = async (req, res) => {
+  const { year } = req.params
+  const { targetAmount, targetPets, petsHelped } = req.body
+  
+  const updatedGoals = await prisma.donationGoals.upsert({
+    where: {
+      year: parseInt(year)
+    },
+    update: {
+      targetAmount,
+      targetPets,
+      petsHelped
+    },
+    create: {
+      year: parseInt(year),
+      targetAmount,
+      targetPets,
+      petsHelped
+    }
+  })
+  
+  return res.status(200).json(updatedGoals)
+}
