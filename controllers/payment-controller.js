@@ -2,6 +2,7 @@ const createError = require("../utils/createError");
 const prisma = require("../configs/prisma")
 
 
+
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2022-08-01",
 });
@@ -39,42 +40,41 @@ exports.createPayment = async (req, res, next) => {
 
 exports.confirmPayment = async (req, res, next) => {
     try {
+
         const { userId, amount, paymentMethod } = req.body;
+        console.log(req.body)
+        // Convert amount to satang (1 THB = 100 satang)
+        const amountInSatang = Math.round(Number(amount) * 100);
+        
+        // Validate minimum amount (1000 satang = 10 THB)
+        if (amountInSatang < 1000) {
+            return next(createError(400, 'Amount must be at least ฿10.00 THB'));
+        }
 
         if (!userId || !amount || !paymentMethod) {
-            return createError(400, 'Customer ID, amount, and payment method are required');
+            return next(createError(400, 'Customer ID, amount, and payment method are required'));
         }
 
-        // ตรวจสอบว่าผู้ใช้มีอยู่จริง
-        const userExists = await prisma.users.findFirst({
-            where: { id: userId }
-        });
-
-        if (!userExists) {
-            return createError(400, 'User not found');
-        }
-
-        // สร้าง PaymentIntent ขึ้นอยู่กับประเภทการชำระเงิน
+        // Create PaymentIntent with amount in satang
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount,
+            amount: amountInSatang,
             currency: 'thb',
             payment_method_types: paymentMethod === 'CREDIT' ? ['card'] : ['promptpay'],
         });
 
-        // บันทึกคำสั่งซื้อ (donate) ใหม่ลงในฐานข้อมูล
+        // Store original amount in THB in database
         const donate = await prisma.donates.create({
             data: {
                 userId: userId,
-                total: amount,
+                total: Number(amount),
                 payment_method: paymentMethod === 'CREDIT' ? 'CREDIT' : 'PROMPTPAY',
-                transaction_id: paymentIntent.id, // transaction_id จาก PaymentIntent
+                transaction_id: paymentIntent.id,
                 is_recurring: paymentMethod === 'CREDIT',
                 receipt_url: paymentMethod === 'PROMPTPAY' ? paymentIntent.next_action.promptpay.receipt_url : null,
                 status: paymentMethod === 'CREDIT' ? 'DONE' : 'PENDING',
             },
         });
 
-        // ส่งข้อมูลกลับไปยังฝั่ง frontend
         res.json({
             message: 'Donate created',
             donate,
@@ -84,3 +84,4 @@ exports.confirmPayment = async (req, res, next) => {
         next(error);
     }
 };
+
