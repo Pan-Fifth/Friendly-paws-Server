@@ -73,3 +73,24 @@ exports.regisEvent = async (req, res, next) => {
         
     }
 }
+
+exports.createEvent = async (req, res, next) => {
+    try{
+        const { title, date_start, date_end, description, location, image } = req.body;
+        const userId = req.user
+        const event = await prisma.events.create({
+            data: {
+                title,
+                date_start,
+                date_end,
+                description,
+                location,
+                image,
+                userId: +userId.user.id,
+            }
+        });
+        res.status(200).json({ message: "createEvent success", event });
+    } catch(error) {
+        next(error);
+    }
+}
