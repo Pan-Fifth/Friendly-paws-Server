@@ -15,7 +15,10 @@ const authRouter = require("./routes/auth-route");
 const userRouter = require("./routes/user-route");
 const paymentRouter = require("./routes/payment-route");
 const petRouter = require("./routes/pet-route");
-const { authenticate } = require("./middlewares/authenticate");
+const eventRouter = require("./routes/event-route");
+const adminRouter = require("./routes/admin-route");
+const exportRouter = require("./routes/export-route");
+const languageMiddleware = require("./middlewares/languageMiddleware");
 
 
 app.use(morgan("dev"));
@@ -29,13 +32,16 @@ app.use(cors({
     credentials: true,
 }));
 app.use(bodyParser.json());
+// สำหรับเปลี่ยนภาษาห้ามลบ
+app.use(languageMiddleware);
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/event", eventRouter);
 app.use("/payment", paymentRouter);
-app.use("/pet",petRouter)
-
-
+app.use("/pet", petRouter)
+app.use("/admin", adminRouter)
+app.use("/export", exportRouter)
 
 
 

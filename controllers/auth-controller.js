@@ -1,5 +1,3 @@
-
-
 const prisma = require("../configs/prisma")
 const bcryptjs = require("bcryptjs")
 const jwt = require("jsonwebtoken")
@@ -101,7 +99,8 @@ exports.loginGoogle = async (req, res, next) => {
         const googleId = payloadFromGoogle['sub'];
         const email = payloadFromGoogle['email'];
         const firstname = payloadFromGoogle.given_name || payloadFromGoogle.name.split(' ')[0];
-
+        const lastname = payloadFromGoogle.family_name
+        console.log('payloadFromGoogle :>> ', payloadFromGoogle);
         let user = await getUserByEmail(email);
 
         if (!user) {
@@ -110,13 +109,16 @@ exports.loginGoogle = async (req, res, next) => {
                 googleId,
                 email,
                 firstname,
+                lastname,
             });
         } else if (!user.googleId || !user.firstname) {
             // ถ้ามีผู้ใช้แล้ว แต่ไม่มี googleId หรือ firstname ให้ทำการอัปเดต
             const dataToUpdate = {
                 googleId: user.googleId || googleId,
                 firstname: user.firstname || firstname,
+                lastname: user.lastname || lastname
             };
+            console.log(dataToUpdate, "dataToUpdate")
             await updateUser(user.id, dataToUpdate);
             user = await getUserByEmail(email); // รีเฟรชข้อมูลผู้ใช้หลังการอัปเดต
         }
@@ -127,12 +129,13 @@ exports.loginGoogle = async (req, res, next) => {
                 email: user.email,
                 role: user.role,
                 firstname: user.firstname,
+                lastname: user.lastname,
                 googleId: user.googleId,
             }
         };
 
         const genToken = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn: "1d" });
-        console.log("Payload sent to frontend:", userPayload);
+
 
         res.status(200).json({
             message: 'Login successful',
@@ -147,18 +150,39 @@ exports.loginGoogle = async (req, res, next) => {
 };
 
 
+const sendResetEmail = async (email, token) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
 
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Reset Your Password',
+        text: `Click this link to reset your password.: http://localhost:5173/auth/reset-password/${token}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
 
 exports.forgetPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
+        console.log(email, "email backend")
         const user = await getUserByEmail(email)
+        console.log('user forgetpass :>> ', user);
         if (!user) {
             return createError(404, 'email not found');
         }
 
         const token = crypto.randomBytes(20).toString('hex');
         const expiry = new Date(Date.now() + 3600000);
+        console.log('Generated token and expiry:', token, expiry);
 
         await prisma.users.update({
             where: { email },
@@ -169,6 +193,7 @@ exports.forgetPassword = async (req, res, next) => {
         });
 
         await sendResetEmail(email, token);
+        console.log('Reset email sent successfully');
 
         res.json({ message: 'The password reset link has been sent to your email.', tokenEmail: token });
     } catch (error) {

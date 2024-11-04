@@ -1,12 +1,17 @@
 const express = require('express');
-const { aPets, pet ,createAdoptRequest} = require('../controllers/pet-controller');
+const { aPets, pet, createPets, allPets, updatePets,deletePets ,createAdoptRequest} = require('../controllers/pet-controller');
 const { adoptValidationSchema } = require('../middlewares/validator');
-const upload  = require('../middlewares/upload');
 const router = express.Router()
+const uploadMulter = require('../middlewares/upload-multer');
+const { authenticate } = require('../middlewares/authenticate');
 
 router.get("/get-apets",aPets)
 router.get("/:id",pet)
-router.post("/create-adopt",upload.array('files',5),adoptValidationSchema,createAdoptRequest)
+router.get("/", authenticate, allPets)
+router.post("/", authenticate ,uploadMulter.single('image'), createPets )
+router.patch("/:id", authenticate ,uploadMulter.single('image'), updatePets )
+router.delete("/:id", authenticate ,uploadMulter.single('image'), deletePets )
+router.post("/create-adopt",authenticate,uploadMulter.array('files',5),adoptValidationSchema,createAdoptRequest)
 
 
 module.exports = router;
