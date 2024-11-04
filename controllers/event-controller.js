@@ -5,6 +5,11 @@ const createError = require('../utils/createError');
 exports.eventShowPages = async (req, res) => {
     try{ 
         const today = new Date();
+        const allEvent = await prisma.events.findMany({
+            include:{
+                image: true,
+            }
+        });
         const pastEvent = await prisma.events.findMany({
             where: {
                 date_start: {
@@ -25,7 +30,7 @@ exports.eventShowPages = async (req, res) => {
                 image: true,
             }
         });
-        res.status(200).json({ events,pastEvent });
+        res.status(200).json({ events,pastEvent,allEvent });
     } catch(error) {
         res.status(500).json({ message: "eventShowPages error", error: error.message });
     }
