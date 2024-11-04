@@ -18,6 +18,7 @@ const petRouter = require("./routes/pet-route");
 const eventRouter = require("./routes/event-route");
 const adminRouter = require("./routes/admin-route");
 const exportRouter = require("./routes/export-route");
+const languageMiddleware = require("./middlewares/languageMiddleware");
 
 
 app.use(morgan("dev"));
@@ -31,6 +32,8 @@ app.use(cors({
     credentials: true,
 }));
 app.use(bodyParser.json());
+// สำหรับเปลี่ยนภาษาห้ามลบ
+app.use(languageMiddleware);
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);

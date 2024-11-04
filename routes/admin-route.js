@@ -17,6 +17,8 @@ router.get('/report-donation', reportDonateByDate);
 router.get('/report-donation-all', reportAllDonate);
 router.get('/report-pet-all', reportAllPetList);
 
+router.get('/report-pet-all', reportAllPetList);
+
 
 // เพิ่ม routes สำหรับจัดการผู้ใช้
 router.get('/users', getAllUsers); // ดึงข้อมูลผู้ใช้ทั้งหมด
