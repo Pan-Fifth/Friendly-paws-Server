@@ -3,9 +3,7 @@ const createError = require('../utils/createError');
 const cloudinary = require('../configs/cloudinary');
 const fs = require('fs/promises');
 const path = require('path');
-const cloudinary = require('../configs/cloudinary');
-const fs = require('fs/promises');
-const path = require('path');
+
 
 
 exports.eventShowPages = async (req, res) => {
