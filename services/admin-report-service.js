@@ -285,3 +285,35 @@ exports.getAllPetList = async () => {
         throw new Error("Failed to fetch pets");
     }
 };
+
+exports.getAllAdoptRequest = async()=>{
+    try {
+        const result = await prisma.adopts.findMany({
+            include:{
+                user:{
+                    select:{
+                        email:true,
+                    firstname:true,
+                    phone:true,
+                    email:true
+                    }
+                },
+                pet:{
+                    select:{
+                        name_en:true,
+                        name_th:true,
+                        image:{
+                            select:{
+                                url:true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        return result
+    } catch (err) {
+        console.error("err getAllAdoptRequest", error);
+        throw new Error("Failed to fetch AllAdoptRequest");
+    }
+}

@@ -1,6 +1,6 @@
 const createError = require('../utils/createError')
 const { getChooseEventBydate, getAllEvent, getChooseAdoptBydate, getAllAdopt,
-    getChooseDonateBydate, getAllDonate, getAllPetList } = require('../services/admin-report-service')
+    getChooseDonateBydate, getAllDonate, getAllPetList ,getAllAdoptRequest } = require('../services/admin-report-service')
 
 
 exports.reportEventByDate = async (req, res, next) => {
@@ -102,3 +102,16 @@ exports.reportAllPetList = async (req, res, next) => {
         res.status(500).json({ message: "Failed to fetch all pets", error: err.message });
     }
 };
+
+exports.allAdoptRequest = async (req,res,next)=>{
+    try {
+        const user = req.user
+        if(user.role !== "ADMIN"){
+            return createError(401,"unauthorized")
+        }
+        const adoptRequest = await getAllAdoptRequest(); 
+        res.json(adoptRequest) 
+    } catch (err) {
+        next(err)
+    }
+}
