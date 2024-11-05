@@ -1,5 +1,8 @@
 const prisma = require('../configs/prisma');
 const createError = require('../utils/createError');
+const cloudinary = require('../configs/cloudinary');
+const fs = require('fs/promises');
+const path = require('path');
 
 
 exports.eventShowPages = async (req, res) => {
@@ -21,7 +24,8 @@ exports.eventShowPages = async (req, res) => {
             where: {
                 date_start: {
                     lte: today,
-                }
+                },
+                status: "COMPLETED"
             },
             select: {
                 id: true,
@@ -37,7 +41,9 @@ exports.eventShowPages = async (req, res) => {
             where: {
                 date_start: {
                     gte: today,
-                }
+                },
+                status: "ACTIVE"
+
             },
             select: {
                 id: true,
@@ -110,23 +116,91 @@ exports.regisEvent = async (req, res, next) => {
     }
 }
 
+
 exports.createEvent = async (req, res, next) => {
     try {
-        const { title, date_start, date_end, description, location, image } = req.body;
-        const userId = req.user
-        const event = await prisma.events.create({
+        const { title_en, title_th, date_start, date_end, description_en, description_th, location } = req.body;
+        console.log("req.body", req.body)
+
+        // ตรวจสอบสิทธิ์การเข้าถึง
+        if (req.user.role !== "ADMIN") {
+            return res.status(400).json({ message: "Unauthorized" });
+        }
+
+        // ตรวจสอบว่ามีไฟล์อัปโหลดมาหรือไม่
+        const hasFile = !!req.file;
+        let uploadResult = {};
+        console.log("hasFile", hasFile)
+
+        if (hasFile) {
+            // อัปโหลดไฟล์ไปที่ Cloudinary
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                overwrite: true,
+                public_id: path.parse(req.file.path).name,
+            });
+            // ลบไฟล์ออกจากเครื่องหลังอัปโหลดสำเร็จ
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error("Error removing file:", err);
+            })
+        }
+
+        // สร้างข้อมูล event ใหม่
+        const newEvent = await prisma.events.create({
             data: {
-                title,
-                date_start,
-                date_end,
-                description,
+                title_en,
+                title_th,
+                description_en,
+                description_th,
+                date_start: new Date(date_start),
+                date_end: new Date(date_end),
                 location,
-                image,
-                userId: +userId.user.id,
-            }
+                image: {
+                    create: hasFile ? { url: uploadResult.secure_url || '' } : [],
+                },
+            },
+            include: {
+                image: true,
+            },
         });
-        res.status(200).json({ message: "createEvent success", event });
+
+        res.status(200).json({
+            message: "Event created successfully",
+            event: newEvent,
+        });
+
+    } catch (err) {
+        console.error('Error creating event:', err);
+        next(err);
+    }
+};
+
+
+
+
+exports.deleteEvent = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const event = await prisma.events.findUnique({
+            where: {
+                id: +id,
+            },
+        });
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+        // ตรวจสอบสิทธิ์การเข้าถึง
+        if (req.user.role !== "ADMIN") {
+            return res.status(400).json({ message: "Unauthorized" });
+        }
+        // ลบ event
+        await prisma.events.delete({
+            where: {
+                id: +id,
+            },
+        });
+        res.status(200).json({ message: "Event deleted successfully" });
     } catch (error) {
+        console.log(error)
         next(error);
     }
 }
