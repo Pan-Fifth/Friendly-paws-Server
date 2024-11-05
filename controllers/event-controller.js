@@ -1,5 +1,8 @@
 const prisma = require('../configs/prisma');
 const createError = require('../utils/createError');
+const cloudinary = require('../configs/cloudinary');
+const fs = require('fs/promises');
+const path = require('path');
 
 
 exports.eventShowPages = async (req, res) => {
@@ -8,7 +11,7 @@ exports.eventShowPages = async (req, res) => {
 
         const today = new Date();
         const allEvent = await prisma.events.findMany({
-            include:{
+            include: {
                 image: true,
             }
         });
@@ -32,8 +35,8 @@ exports.eventShowPages = async (req, res) => {
                 image: true,
             }
         });
-        res.status(200).json({ events,pastEvent,allEvent });
-    } catch(error) {
+        res.status(200).json({ events, pastEvent, allEvent });
+    } catch (error) {
         res.status(500).json({ message: "eventShowPages error", error: error.message });
     }
 }
@@ -45,34 +48,36 @@ exports.regisEvent = async (req, res, next) => {
     try {
 
         const userId = req.user
-        console.log('userId',userId)
+        console.log('userId', userId)
         const { eventId } = req.body;
-        console.log("eventId",eventId)
-        const event = await prisma.events.findFirst({
+        console.log("eventId", eventId)
+        const event = await prisma.events.findUnique({
             where: {
-                id: 3
+                id: +eventId.eventId,
             }
         });
+        console.log("event", event)
         if (!event) {
             return createError(400, "event not found");
         }
         const haveRegis = await prisma.eventAttendees.findFirst({
             where: {
-                userId: +userId.user.id,
-                eventId: +eventId,
+                userId: +userId.id,
+                eventId: +eventId.eventId,
             }
         });
+        console.log("haveRegis", haveRegis)
         if (haveRegis) {
-            return createError(400, "user already register event");
+            return createError(400, "ลงทะเบียนล่วงหน้าเรียบร้อยแล้ว");
         }
         console.log("----", event)
         const regisEvent = await prisma.eventAttendees.create({
             data: {
-                userId: +userId.user.id,
-                eventId: +eventId,
+                userId: +userId.id,
+                eventId: +eventId.eventId,
             }
         });
-        console.log("regisEvent--->",regisEvent)
+        console.log("regisEvent--->", regisEvent)
         res.status(200).json({ message: "regisEvent success", regisEvent });
     } catch (error) {
         console.log(error)
@@ -81,26 +86,64 @@ exports.regisEvent = async (req, res, next) => {
     }
 }
 
+
 exports.createEvent = async (req, res, next) => {
-    try{
-        const { title, date_start, date_end, description, location, image } = req.body;
-        const userId = req.user
-        const event = await prisma.events.create({
+    try {
+        const { title_en, title_th, date_start, date_end, description_en, description_th, location } = req.body;
+        console.log("req.body", req.body)
+        
+        // ตรวจสอบสิทธิ์การเข้าถึง
+        if (req.user.role !== "ADMIN") {
+            return res.status(400).json({ message: "Unauthorized" });
+        }
+
+        // ตรวจสอบว่ามีไฟล์อัปโหลดมาหรือไม่
+        const hasFile = !!req.file;
+        let uploadResult = {};
+        console.log("hasFile", hasFile)
+        
+        if (hasFile) {
+            // อัปโหลดไฟล์ไปที่ Cloudinary
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                overwrite: true,
+                public_id: path.parse(req.file.path).name,
+            });
+            // ลบไฟล์ออกจากเครื่องหลังอัปโหลดสำเร็จ
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error("Error removing file:", err);
+            })
+        }
+
+        // สร้างข้อมูล event ใหม่
+        const newEvent = await prisma.events.create({
             data: {
-                title,
-                date_start,
-                date_end,
-                description,
+                title_en,
+                title_th,
+                description_en,
+                description_th,
+                date_start: new Date(date_start),
+                date_end: new Date(date_end),
                 location,
-                image,
-                userId: +userId.user.id,
-            }
+                image: {
+                    create: hasFile ? { url: uploadResult.secure_url || '' } : [],
+                },
+            },
+            include: {
+                image: true,
+            },
         });
-        res.status(200).json({ message: "createEvent success", event });
-    } catch(error) {
-        next(error);
+
+        res.status(200).json({
+            message: "Event created successfully",
+            event: newEvent,
+        });
+        
+    } catch (err) {
+        console.error('Error creating event:', err);
+        next(err);
     }
-}
+};
+
 
 // สำหรับเปลี่ยนภาษาห้ามมลบบบบ
 // exports.eventShowPages = async (req, res) => {
