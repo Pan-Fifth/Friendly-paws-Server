@@ -9,32 +9,74 @@ const {aiCalScore} = require('../services/ai-scoring')
 
 exports.aPets = async (req, res, next) => {
     try {
+        console.log("query",req.query)
+        const {gender,age,weight} = req.query
+        const {count,page} = req.params
 
+        let ageFilter = {};
+        const now = new Date();
+        const daysInMs = 24 * 60 * 60 * 1000;
+
+        if (age) {
+            switch (age) {
+                case 'KID':
+                    ageFilter.age = { 
+                        gte: new Date(now - (190 * daysInMs)),
+                        // lt: new Date(now )
+                    }
+                    break;
+                case 'JUNIOR':
+                    ageFilter.age = {
+                        gte: new Date(now - (730 * daysInMs)),
+                        lt: new Date(now - (190 * daysInMs))
+                    };
+                    break;
+                case 'SENIOR':
+                    ageFilter.age = {
+                        gte: new Date(now - (2557 * daysInMs)),
+                        lt: new Date(now - (730 * daysInMs))
+                    };
+                    break;
+                case 'ADULT':
+                    ageFilter.age = { lt: new Date(now - (2557 * daysInMs)) };
+                    break;
+            }
+        }
         const allAvaiPets = await prisma.pets.findMany({
             where: {
                 status: "AVAILABLE",
+                gender,
+                ...ageFilter,
+                weight
             },
+            take: parseInt(count),
+            orderBy: { created_at: "desc" },
+            skip: ((+page)-1)*count,
             select: {
                 id: true,
                 name_en: true,
                 age: true,
                 gender: true,
+                weight: true,
                 image: {
                     select: {
                         url: true
                     }
-
                 }
             },
         })
-        // allAvaiPets.map((petInfo)=>{
-        //     const birthDay = petInfo.age 
-        //     const age = (new Date() - birthDay)/86400000
-        //     petInfo.birthDay = birthDay
-        //     petInfo.age = age
-        // })
-        // console.log("getApets")
+
+        allAvaiPets.map((petInfo) => {
+            console.log(petInfo)
+            const birthDay = petInfo.age
+            const age = (new Date() - birthDay) / 86400000
+            petInfo.birthDay = birthDay
+            petInfo.age = age
+        })
+
+        console.log("getApets")
         res.json(allAvaiPets)
+        // res.json(count)
     } catch (err) {
         next(err)
     }
@@ -42,6 +84,7 @@ exports.aPets = async (req, res, next) => {
 
 exports.pet = async (req, res, next) => {
     try {
+        
         const { id } = req.params
         if (!id) {
             return createError(400, "pet id not provided")
@@ -102,13 +145,13 @@ exports.allPets = async(req,res,next) => {
             image:true
         }
         
-    })
+        })
 
-    res.json(getAllpets)
+        res.json(getAllpets)
         
-    } catch (err) {
-        next(err)
-    }
+        } catch (err) {
+            next(err)
+        }
 }
 
 
