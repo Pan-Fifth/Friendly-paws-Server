@@ -5,8 +5,8 @@ const router = express.Router()
 const uploadMulter = require('../middlewares/upload-multer');
 const { authenticate } = require('../middlewares/authenticate');
 
-router.get("/get-apets", aPets)
-router.get("/:id", pet)
+router.get("/get-apets/:count/:page",aPets)
+router.get("/:id",pet)
 router.get("/", authenticate, allPets)
 router.post("/", authenticate, uploadMulter.single('image'), createPets)
 router.patch("/:id", authenticate, uploadMulter.single('image'), updatePets)
