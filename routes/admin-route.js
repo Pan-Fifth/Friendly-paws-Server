@@ -12,6 +12,9 @@ const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/
 const { reportEventByDate, reportAllEvent, reportAdoptByDate,
     reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList } = require('../controllers/admin-report-controller');
 const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require('../controllers/admin-controller');
+const { createEvent } = require("../controllers/event-controller");
+const uploadMulter = require("../middlewares/upload-Event");
+const { authenticate } = require("../middlewares/authenticate");
 const adminPageController = require('../controllers/admin-page-controller')
 
 
@@ -38,6 +41,10 @@ router.delete('/users/:id', deleteUserById); // ลบผู้ใช้
 router.get('/dashboard', getDashboard)
 router.get('/manage-donation', getDonation)
 router.put('/manage-donation/:id', updateDonation)
+
+// เพิ่ม routes สำหรับสร้างอีเวนต์
+router.post('/events', authenticate ,uploadMulter.single('image'), createEvent);
+
 
 
 router.get('/', getDonationGoals)
