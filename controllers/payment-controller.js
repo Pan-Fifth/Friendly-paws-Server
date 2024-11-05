@@ -41,32 +41,31 @@ exports.createPayment = async (req, res, next) => {
 
 exports.confirmPayment = async (req, res, next) => {
     try {
-
         const { userId, amount, paymentMethod } = req.body;
         console.log(req.body)
-        // Convert amount to satang (1 THB = 100 satang)
+        
         const amountInSatang = Math.round(Number(amount) * 100);
         
-        // Validate minimum amount (1000 satang = 10 THB)
         if (amountInSatang < 1000) {
             return next(createError(400, 'Amount must be at least ฿10.00 THB'));
         }
 
-        if ( !amount || !paymentMethod) {
-            return next(createError(400, 'Customer ID, amount, and payment method are required'));
+        if (!amount || !paymentMethod) {
+            return next(createError(400, 'Amount and payment method are required'));
         }
 
-        // Create PaymentIntent with amount in satang
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amountInSatang,
             currency: 'thb',
             payment_method_types: paymentMethod === 'CREDIT' ? ['card'] : ['promptpay'],
         });
 
-        // Store original amount in THB in database
+        // Single donation creation
+        // Send email only if user exists
+        if (userId && donate.user?.email) {
         const donate = await prisma.donates.create({
             data: {
-                userId: userId,
+                userId: parseInt(userId),  
                 total: Number(amount),
                 payment_method: paymentMethod === 'CREDIT' ? 'CREDIT' : 'PROMPTPAY',
                 transaction_id: paymentIntent.id,
@@ -74,24 +73,9 @@ exports.confirmPayment = async (req, res, next) => {
                 receipt_url: paymentMethod === 'PROMPTPAY' ? paymentIntent.next_action.promptpay.receipt_url : null,
                 status: paymentMethod === 'CREDIT' ? 'DONE' : 'PENDING',
             },
+            include: userId ? { user: true } : undefined
         });
-        if(userId) {
-            try {const donate = await prisma.donates.create({
-                data: {
-                    userId: userId,
-                    total: Number(amount),
-                    payment_method: paymentMethod === 'CREDIT' ? 'CREDIT' : 'PROMPTPAY',
-                    transaction_id: paymentIntent.id,
-                    is_recurring: paymentMethod === 'CREDIT',
-                    receipt_url: paymentMethod === 'PROMPTPAY' ? paymentIntent.next_action.promptpay.receipt_url : null,
-                    status: paymentMethod === 'CREDIT' ? 'DONE' : 'PENDING',
-                },
-                include: {
-                    user: true // Include user details to get email
-                }
-            });
-    
-            // Send confirmation email
+
             const emailSubject = 'Thank You for Your Donation!';
             const emailMessage = `
                 Thank you for your generous donation of ฿${amount} THB!
@@ -103,30 +87,39 @@ exports.confirmPayment = async (req, res, next) => {
                 
                 Your support helps us continue our mission to help animals in need.
             `;
-    
+            
             await sendEmailByNodemailer(
                 donate.user.email,
                 emailSubject,
                 emailMessage,
                 donate.user.googleId
             );
-    
+            console.log('Email sent successfully', donate.user.email, emailSubject,emailMessage,donate.user.googleId);
             res.json({
                 message: 'Donate created',
                 donate,
             });
-        } catch (error) {
-            console.error('Error creating donate:', error.message);
-            next(error);
-        }
-        }
+        } else {
+            const donate = await prisma.donates.create({
+                data: {
+                    total: Number(amount),
+                    payment_method: paymentMethod === 'CREDIT' ? 'CREDIT' : 'PROMPTPAY',
+                    transaction_id: paymentIntent.id,
+                    is_recurring: paymentMethod === 'CREDIT',
+                    receipt_url: paymentMethod === 'PROMPTPAY' ? paymentIntent.next_action.promptpay.receipt_url : null,
+                    status: paymentMethod === 'CREDIT' ? 'DONE' : 'PENDING',
+                },
+        })
+
         res.json({
             message: 'Donate created',
             donate,
         });
+    }
+  
+
     } catch (error) {
         console.error('Error creating donate:', error.message);
         next(error);
     }
 };
-

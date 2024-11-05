@@ -13,9 +13,8 @@ const sendEmailByNodemailer = async (recipient, subject, message, googleId) => {
     });
 
     const mailOptions = {
-        from: googleId ? recipient : process.env.EMAIL_ADMIN,
-        to: process.env.EMAIL_ADMIN,
-        replyTo: googleId ? recipient : process.env.EMAIL_ADMIN,
+        from: process.env.EMAIL_ADMIN,
+        to: recipient,
         subject: subject,
         text: `Message from ${recipient}:\n\n${message}`,
     };
