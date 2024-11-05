@@ -4,7 +4,7 @@ const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/
 
 const { reportEventByDate, reportAllEvent, reportAdoptByDate,
     reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList } = require('../controllers/admin-report-controller');
-const { getDashboard, getDonation, updateDonation } = require('../controllers/admin-controller');
+const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require('../controllers/admin-controller');
 const { createEvent } = require("../controllers/event-controller");
 const uploadMulter = require("../middlewares/upload-Event");
 const { authenticate } = require("../middlewares/authenticate");
@@ -36,5 +36,9 @@ router.put('/manage-donation/:id', updateDonation)
 // เพิ่ม routes สำหรับสร้างอีเวนต์
 router.post('/events', authenticate ,uploadMulter.single('image'), createEvent);
 
+
+
+router.get('/', getDonationGoals)
+router.put('/:year', updateDonationGoals)
 
 module.exports = router;
