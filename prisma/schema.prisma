@@ -177,7 +177,7 @@ model AccommodationImages {
 
 model Donates {
   id             Int           @id @default(autoincrement())
-  userId         Int           @map("user_id")
+  userId         Int?           @map("user_id")
   total          Int
   payment_method paymentMethod
   transaction_id String        @unique
@@ -187,7 +187,7 @@ model Donates {
   created_at     DateTime      @default(now()) @db.Timestamp(0)
 
   // Relation
-  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user Users? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum paymentMethod {
@@ -280,3 +280,5 @@ model DonationGoals {
   created_at    DateTime @default(now()) @db.Timestamp(0)
   updated_at    DateTime @updatedAt @db.Timestamp(0) @default(now())
 } 
+
+

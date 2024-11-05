@@ -14,6 +14,7 @@ CREATE TABLE `Users` (
     `role` ENUM('USER', 'ADMIN', 'VOLUNTEER') NOT NULL DEFAULT 'USER',
 
     UNIQUE INDEX `Users_email_key`(`email`),
+    UNIQUE INDEX `Users_googleId_key`(`googleId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -46,7 +47,7 @@ CREATE TABLE `Pets` (
     `weight` DOUBLE NULL,
     `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` TIMESTAMP(0) NOT NULL,
-    `user_id` INTEGER NULL,
+    `usersId` INTEGER NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -89,6 +90,7 @@ CREATE TABLE `Adopts` (
     `notes` TEXT NULL,
     `home_image_checked` BOOLEAN NOT NULL DEFAULT false,
     `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `usersId` INTEGER NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -175,7 +177,7 @@ CREATE TABLE `VolunteerSkills` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `VolunteerAvailabilitys` (
+CREATE TABLE `VolunteerAvailabilities` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `time_slot` VARCHAR(191) NOT NULL,
     `volunteer_id` INTEGER NOT NULL,
@@ -183,11 +185,25 @@ CREATE TABLE `VolunteerAvailabilitys` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `DonationGoals` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `year` INTEGER NOT NULL,
+    `targetAmount` INTEGER NOT NULL,
+    `targetPets` INTEGER NOT NULL,
+    `petsHelped` INTEGER NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updated_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+
+    UNIQUE INDEX `DonationGoals_year_key`(`year`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `HomeImages` ADD CONSTRAINT `HomeImages_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `Users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Pets` ADD CONSTRAINT `Pets_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `Users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Pets` ADD CONSTRAINT `Pets_usersId_fkey` FOREIGN KEY (`usersId`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `PetImages` ADD CONSTRAINT `PetImages_pet_id_fkey` FOREIGN KEY (`pet_id`) REFERENCES `Pets`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -197,6 +213,12 @@ ALTER TABLE `Adopts` ADD CONSTRAINT `Adopts_user_id_fkey` FOREIGN KEY (`user_id`
 
 -- AddForeignKey
 ALTER TABLE `Adopts` ADD CONSTRAINT `Adopts_pet_id_fkey` FOREIGN KEY (`pet_id`) REFERENCES `Pets`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Adopts` ADD CONSTRAINT `Adopts_approved_by_fkey` FOREIGN KEY (`approved_by`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Adopts` ADD CONSTRAINT `Adopts_usersId_fkey` FOREIGN KEY (`usersId`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `AccommodationImages` ADD CONSTRAINT `AccommodationImages_adopt_id_fkey` FOREIGN KEY (`adopt_id`) REFERENCES `Adopts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -220,4 +242,4 @@ ALTER TABLE `Volunteers` ADD CONSTRAINT `Volunteers_user_id_fkey` FOREIGN KEY (`
 ALTER TABLE `VolunteerSkills` ADD CONSTRAINT `VolunteerSkills_volunteer_id_fkey` FOREIGN KEY (`volunteer_id`) REFERENCES `Volunteers`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `VolunteerAvailabilitys` ADD CONSTRAINT `VolunteerAvailabilitys_volunteer_id_fkey` FOREIGN KEY (`volunteer_id`) REFERENCES `Volunteers`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `VolunteerAvailabilities` ADD CONSTRAINT `VolunteerAvailabilities_volunteer_id_fkey` FOREIGN KEY (`volunteer_id`) REFERENCES `Volunteers`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
