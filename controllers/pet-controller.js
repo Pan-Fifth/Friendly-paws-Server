@@ -4,14 +4,14 @@ const createError = require('../utils/createError')
 const cloudinary = require('../configs/cloudinary')
 const path = require('path')
 const fs = require('fs/promises')
-const {aiCalScore} = require('../services/ai-scoring')
+const { aiCalScore } = require('../services/ai-scoring')
 
 
 exports.aPets = async (req, res, next) => {
     try {
-        console.log("query",req.query)
-        const {gender,age,weight} = req.query
-        const {count,page} = req.params
+        console.log("query", req.query)
+        const { gender, age, weight } = req.query
+        const { count, page } = req.params
 
         let ageFilter = {};
         const now = new Date();
@@ -20,7 +20,7 @@ exports.aPets = async (req, res, next) => {
         if (age) {
             switch (age) {
                 case 'KID':
-                    ageFilter.age = { 
+                    ageFilter.age = {
                         gte: new Date(now - (190 * daysInMs)),
                         // lt: new Date(now )
                     }
@@ -51,7 +51,7 @@ exports.aPets = async (req, res, next) => {
             },
             take: parseInt(count),
             orderBy: { created_at: "desc" },
-            skip: ((+page)-1)*count,
+            skip: ((+page) - 1) * count,
             select: {
                 id: true,
                 name_en: true,
@@ -82,9 +82,12 @@ exports.aPets = async (req, res, next) => {
     }
 }
 
+
+
 exports.pet = async (req, res, next) => {
+
     try {
-        
+
         const { id } = req.params
         if (!id) {
             return createError(400, "pet id not provided")
@@ -133,31 +136,31 @@ exports.pet = async (req, res, next) => {
 
 
 
-exports.allPets = async(req,res,next) => {
+exports.allPets = async (req, res, next) => {
     try {
         const user = req.user
 
-        if(user.role !== "ADMIN"){
+        if (user.role !== "ADMIN") {
             return createError(400, "Unauthorized")
         }
-    const getAllpets = await prisma.pets.findMany({
-        include:{
-            image:true
-        }
-        
+        const getAllpets = await prisma.pets.findMany({
+            include: {
+                image: true
+            }
+
         })
 
         res.json(getAllpets)
-        
-        } catch (err) {
-            next(err)
-        }
+
+    } catch (err) {
+        next(err)
+    }
 }
 
 
 
 
-exports.createPets = async(req,res,next) => {
+exports.createPets = async (req, res, next) => {
     try {
         const {
             name_en,
@@ -176,15 +179,15 @@ exports.createPets = async(req,res,next) => {
             weight,
             userId,
             image
-          } = req.body;
+        } = req.body;
 
 
-        if(req.user.role !== "ADMIN"){
+        if (req.user.role !== "ADMIN") {
             return createError(400, "Unauthorized")
         }
 
         const havefile = !!req.file
-        let uploadResult = {} 
+        let uploadResult = {}
         if (havefile) {
             uploadResult = await cloudinary.uploader.upload(req.file.path, {
                 overwrite: true,
@@ -192,50 +195,50 @@ exports.createPets = async(req,res,next) => {
             });
             fs.unlink(req.file.path);
         }
-        
-        
-         const isVaccinated = is_vaccinated === 'true'
-         const isNeutered = is_neutered === 'true'
 
-        
+
+        const isVaccinated = is_vaccinated === 'true'
+        const isNeutered = is_neutered === 'true'
+
+
         if (!name_en || !name_th || !age || !color || !gender || !type) {
             return res.status(400).json({ message: 'Missing required fields.' });
-          }
+        }
 
-          const newPet = await prisma.pets.create({
+        const newPet = await prisma.pets.create({
             data: {
-              name_en,
-              name_th,
-              age: new Date(age),
-              color,
-              gender,
-              type,
-              breed_en,
-              breed_th,
-              description_en,
-              description_th,
-              medical_history,
-              is_vaccinated: isVaccinated,
-              is_neutered: isNeutered,
-              weight: parseFloat(weight),
-              status: 'AVAILABLE',
-              image: {
+                name_en,
+                name_th,
+                age: new Date(age),
+                color,
+                gender,
+                type,
+                breed_en,
+                breed_th,
+                description_en,
+                description_th,
+                medical_history,
+                is_vaccinated: isVaccinated,
+                is_neutered: isNeutered,
+                weight: parseFloat(weight),
+                status: 'AVAILABLE',
+                image: {
                     create: {
                         url: uploadResult.secure_url || ''
                     }
                 },
-                },
-                include: {
-                    image: true,
-                 },
-          });
+            },
+            include: {
+                image: true,
+            },
+        });
 
-          res.json({
+        res.json({
             message: 'Pet created',
             newPet,
         });
 
-        
+
     } catch (err) {
         console.log('Error creating pet:', err);
         next(err)
@@ -243,11 +246,11 @@ exports.createPets = async(req,res,next) => {
 }
 
 
-exports.updatePets = async(req,res,next) => {
+exports.updatePets = async (req, res, next) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const {
-            name_en, 
+            name_en,
             name_th,
             age,
             color,
@@ -263,26 +266,26 @@ exports.updatePets = async(req,res,next) => {
             weight,
             status,
             image
-          } = req.body;
+        } = req.body;
 
         const havefile = !!req.file
-        let uploadResult = {} 
-        
+        let uploadResult = {}
+
         const petsData = await prisma.pets.findUnique({
-            where : {
-                id : +id
+            where: {
+                id: +id
             }
         })
 
-        if(!petsData) {
+        if (!petsData) {
             return createError(400, "Pet not found")
         }
 
-        if(havefile){
-             uploadResult = await cloudinary.uploader.upload(req.file.path, {
-                overwrite : true,
-                public_id :path.parse(req.file.path).name
-                
+        if (havefile) {
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                overwrite: true,
+                public_id: path.parse(req.file.path).name
+
             })
             fs.unlink(req.file.path)
         }
@@ -332,23 +335,23 @@ exports.updatePets = async(req,res,next) => {
     }
 }
 
-exports.deletePets = async(req,res,next) => {
+exports.deletePets = async (req, res, next) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const petsData = await prisma.pets.findUnique({
-            where : {
-                id : +id
+            where: {
+                id: +id
             }
         })
-        if(!petsData) {
+        if (!petsData) {
             return createError(400, "Pet not found")
-        }   
+        }
         const deletePets = await prisma.pets.delete({
-                where : {
-                    id : +id
-                }
-            })
-        res.json({message: 'Pet deleted successfully',deletePets})
+            where: {
+                id: +id
+            }
+        })
+        res.json({ message: 'Pet deleted successfully', deletePets })
 
     } catch (err) {
         next(err)
@@ -357,22 +360,22 @@ exports.deletePets = async(req,res,next) => {
 }
 
 
-exports.allPets = async(req,res,next) => {
+exports.allPets = async (req, res, next) => {
     try {
         const user = req.user
 
-        if(user.role !== "ADMIN"){
+        if (user.role !== "ADMIN") {
             return createError(400, "Unauthorized")
         }
-    const getAllpets = await prisma.pets.findMany({
-        include:{
-            image:true
-        }
-        
-    })
+        const getAllpets = await prisma.pets.findMany({
+            include: {
+                image: true
+            }
 
-    res.json(getAllpets)
-        
+        })
+
+        res.json(getAllpets)
+
     } catch (err) {
         next(err)
     }
@@ -381,7 +384,7 @@ exports.allPets = async(req,res,next) => {
 
 
 
-exports.createPets = async(req,res,next) => {
+exports.createPets = async (req, res, next) => {
     try {
         const {
             name_en,
@@ -400,15 +403,15 @@ exports.createPets = async(req,res,next) => {
             weight,
             userId,
             image
-          } = req.body;
+        } = req.body;
 
 
-        if(req.user.role !== "ADMIN"){
+        if (req.user.role !== "ADMIN") {
             return createError(400, "Unauthorized")
         }
 
         const havefile = !!req.file
-        let uploadResult = {} 
+        let uploadResult = {}
         if (havefile) {
             uploadResult = await cloudinary.uploader.upload(req.file.path, {
                 overwrite: true,
@@ -416,50 +419,50 @@ exports.createPets = async(req,res,next) => {
             });
             fs.unlink(req.file.path);
         }
-        
-        
-         const isVaccinated = is_vaccinated === 'true'
-         const isNeutered = is_neutered === 'true'
 
-        
+
+        const isVaccinated = is_vaccinated === 'true'
+        const isNeutered = is_neutered === 'true'
+
+
         if (!name_en || !name_th || !age || !color || !gender || !type) {
             return res.status(400).json({ message: 'Missing required fields.' });
-          }
+        }
 
-          const newPet = await prisma.pets.create({
+        const newPet = await prisma.pets.create({
             data: {
-              name_en,
-              name_th,
-              age: new Date(age),
-              color,
-              gender,
-              type,
-              breed_en,
-              breed_th,
-              description_en,
-              description_th,
-              medical_history,
-              is_vaccinated: isVaccinated,
-              is_neutered: isNeutered,
-              weight: parseFloat(weight),
-              status: 'AVAILABLE',
-              image: {
+                name_en,
+                name_th,
+                age: new Date(age),
+                color,
+                gender,
+                type,
+                breed_en,
+                breed_th,
+                description_en,
+                description_th,
+                medical_history,
+                is_vaccinated: isVaccinated,
+                is_neutered: isNeutered,
+                weight: parseFloat(weight),
+                status: 'AVAILABLE',
+                image: {
                     create: {
                         url: uploadResult.secure_url || ''
                     }
                 },
-                },
-                include: {
-                    image: true,
-                 },
-          });
+            },
+            include: {
+                image: true,
+            },
+        });
 
-          res.json({
+        res.json({
             message: 'Pet created',
             newPet,
         });
 
-        
+
     } catch (err) {
         console.log('Error creating pet:', err);
         next(err)
@@ -467,11 +470,11 @@ exports.createPets = async(req,res,next) => {
 }
 
 
-exports.updatePets = async(req,res,next) => {
+exports.updatePets = async (req, res, next) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const {
-            name_en, 
+            name_en,
             name_th,
             age,
             color,
@@ -487,26 +490,26 @@ exports.updatePets = async(req,res,next) => {
             weight,
             status,
             image
-          } = req.body;
+        } = req.body;
 
         const havefile = !!req.file
-        let uploadResult = {} 
-        
+        let uploadResult = {}
+
         const petsData = await prisma.pets.findUnique({
-            where : {
-                id : +id
+            where: {
+                id: +id
             }
         })
 
-        if(!petsData) {
+        if (!petsData) {
             return createError(400, "Pet not found")
         }
 
-        if(havefile){
-             uploadResult = await cloudinary.uploader.upload(req.file.path, {
-                overwrite : true,
-                public_id :path.parse(req.file.path).name
-                
+        if (havefile) {
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                overwrite: true,
+                public_id: path.parse(req.file.path).name
+
             })
             fs.unlink(req.file.path)
         }
@@ -556,23 +559,23 @@ exports.updatePets = async(req,res,next) => {
     }
 }
 
-exports.deletePets = async(req,res,next) => {
+exports.deletePets = async (req, res, next) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const petsData = await prisma.pets.findUnique({
-            where : {
-                id : +id
+            where: {
+                id: +id
             }
         })
-        if(!petsData) {
+        if (!petsData) {
             return createError(400, "Pet not found")
-        }   
+        }
         const deletePets = await prisma.pets.delete({
-                where : {
-                    id : +id
-                }
-            })
-        res.json({message: 'Pet deleted successfully',deletePets})
+            where: {
+                id: +id
+            }
+        })
+        res.json({ message: 'Pet deleted successfully', deletePets })
 
     } catch (err) {
         next(err)
@@ -580,106 +583,106 @@ exports.deletePets = async(req,res,next) => {
 
 }
 
-exports.createAdoptRequest= async(req,res,next)=>{
+exports.createAdoptRequest = async (req, res, next) => {
     try {
-        const{userId,petId,firstname,lastname,phone,email,address,career,workTime,workPlace,dayOff,salary,dateOfBirth,socialContact,currentPetCount,currentPetDetails,familyMemberCount,familyAlwaysHome,aloneHours,housingType,hasGarden,hasFence,canWalkDog,deliveryType,notes}=req.input 
-        console.log("req input",req.input)
+        const { userId, petId, firstname, lastname, phone, email, address, career, workTime, workPlace, dayOff, salary, dateOfBirth, socialContact, currentPetCount, currentPetDetails, familyMemberCount, familyAlwaysHome, aloneHours, housingType, hasGarden, hasFence, canWalkDog, deliveryType, notes } = req.input
+        console.log("req input", req.input)
         const hasAdopt = await prisma.adopts.findFirst({
-            where:{
+            where: {
                 userId: +userId,
                 petId: +petId
             }
         })
-        if(hasAdopt){
-            return createError(400,"This pet you already has a request")
+        if (hasAdopt) {
+            return createError(400, "This pet you already has a request")
         }
         const user = await prisma.users.findFirst({
-            where:{
+            where: {
                 id: userId
             }
         })
-        if(!user){
-            return createError(400,"This user not found")
+        if (!user) {
+            return createError(400, "This user not found")
         }
         const updateUser = await prisma.users.update({
-            where:{
+            where: {
                 id: userId
             },
-            data:{
+            data: {
                 firstname,
                 lastname,
                 phone,
                 email,
             }
         })
-        const data ={
-                userId,
-                petId,
-                address,
-                career,
-                workTime,
-                workPlace,
-                dayOff,
-                salary,
-                dateOfBirth,
-                socialContact,
-                currentPetCount,
-                currentPetDetails,
-                familyMemberCount,
-                familyAlwaysHome,
-                aloneHours,
-                housingType,
-                hasGarden,
-                hasFence,
-                canWalkDog,
-                deliveryType,
-                notes,
-            }
+        const data = {
+            userId,
+            petId,
+            address,
+            career,
+            workTime,
+            workPlace,
+            dayOff,
+            salary,
+            dateOfBirth,
+            socialContact,
+            currentPetCount,
+            currentPetDetails,
+            familyMemberCount,
+            familyAlwaysHome,
+            aloneHours,
+            housingType,
+            hasGarden,
+            hasFence,
+            canWalkDog,
+            deliveryType,
+            notes,
+        }
         const createAdoptRequest = await prisma.adopts.create({
-            data:data
+            data: data
         })
         console.log(userId)
         console.log(req.files)
 
 
-        if(req.files.length < 1){
-            return createError(400,"no file given")
+        if (req.files.length < 1) {
+            return createError(400, "no file given")
         }
-        const imagePromiseArray =[]
-        for(let file of req.files){
+        const imagePromiseArray = []
+        for (let file of req.files) {
             const promiseUrl = cloudinary.uploader.upload(file.path)
             imagePromiseArray.push(promiseUrl)
         }
-        const imageArray =await Promise.all(imagePromiseArray)
+        const imageArray = await Promise.all(imagePromiseArray)
 
         const homePics = await prisma.homeImages.createMany({
-            data: imageArray.map((el)=>({
-                        userId: +userId,
-                        url:el.secure_url
-                    }))
-            
+            data: imageArray.map((el) => ({
+                userId: +userId,
+                url: el.secure_url
+            }))
+
         })
 
-        res.json(updateUser,createAdoptRequest,homePics)
-    
+        res.json(updateUser, createAdoptRequest, homePics)
+
     } catch (err) {
         next(err)
-    } finally{
-        const deleteFile = req.files.map((file)=>fs.unlink(file.path))
+    } finally {
+        const deleteFile = req.files.map((file) => fs.unlink(file.path))
         await Promise.all(deleteFile)
     }
 }
 
-exports.checkScore  = async(req,res,next)=>{
+exports.checkScore = async (req, res, next) => {
     try {
-        const{id,lang}=req.params
+        const { id, lang } = req.params
         const adoptDetail = await prisma.adopts.findFirst({
-            where:{
-                id:+id
+            where: {
+                id: +id
             }
         })
-        const score = await aiCalScore(adoptDetail,lang)
-        console.log("this is score",score)
+        const score = await aiCalScore(adoptDetail, lang)
+        console.log("this is score", score)
         res.json(score)
     } catch (err) {
         next(err)
