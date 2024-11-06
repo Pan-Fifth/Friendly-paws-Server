@@ -253,7 +253,7 @@ async function main() {
       .map(async (_, i) => {
         return prisma.homeImages.create({
           data: {
-            userId: users[Math.floor(Math.random() * users.length)].id,
+            adoptId: adopts[Math.floor(Math.random() * adopts.length)].id,
             url: HOME_IMAGES[i],
           },
         });

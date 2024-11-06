@@ -28,7 +28,6 @@ model Users {
   role              Role             @default(USER)
   // Relations
   pets              Pets[]
-  HomeImage         HomeImages[]
   adoptions         Adopts[]         @relation("UserAdoptions")
   donations         Donates[]
   eventAttendees    EventAttendees[]
@@ -44,10 +43,10 @@ enum Role {
 }
 
 model HomeImages {
-  id     Int    @id @default(autoincrement())
-  url    String
-  userId Int    @map("user_id")
-  user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id      Int    @id @default(autoincrement())
+  url     String
+  adoptId Int    @map("user_id")
+  adopts  Adopts @relation(fields: [adoptId], references: [id], onDelete: Cascade)
 }
 
 model Pets {
@@ -142,16 +141,17 @@ model Adopts {
   // Approval Process
   approved_at        DateTime?
   approved_by        Int?
-  notes              String?   @db.Text
+  why                String?   @db.Text
   home_image_checked Boolean   @default(false)
   created_at         DateTime  @default(now()) @db.Timestamp(0)
 
   // Relations
-  user            Users  @relation("UserAdoptions", fields: [userId], references: [id])
-  pet             Pets   @relation("PetAdoptions", fields: [petId], references: [id])
-  approvedByAdmin Users? @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
-  Users           Users? @relation(fields: [usersId], references: [id])
+  user            Users        @relation("UserAdoptions", fields: [userId], references: [id])
+  pet             Pets         @relation("PetAdoptions", fields: [petId], references: [id])
+  approvedByAdmin Users?       @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
+  Users           Users?       @relation(fields: [usersId], references: [id])
   usersId         Int?
+  HomeImages      HomeImages[]
 }
 
 enum HousingType {
@@ -295,7 +295,7 @@ model AboutContent {
   video_url       String
   header_en       String @db.Text
   header_th       String @db.Text
-  description_en  String @db.Text 
+  description_en  String @db.Text
   description_th  String @db.Text
   help_title_en   String
   help_title_th   String
@@ -304,10 +304,9 @@ model AboutContent {
   image           String
 }
 
-
 model EventBanner {
-  id    Int    @id @default(autoincrement())
-  image1 String 
+  id     Int     @id @default(autoincrement())
+  image1 String
   image2 String?
   image3 String?
 }
@@ -319,4 +318,3 @@ model TableContact {
   address String
   hours   String
 }
-
