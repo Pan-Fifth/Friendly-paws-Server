@@ -55,28 +55,34 @@ const EVENT_IMAGES = [
   "https://images.unsplash.com/photo-1517457373958-b7bdd4587205",
 ];
 
+const BANNER_IMAGES = [
+  "https://images.unsplash.com/photo-1548199973-03cce0bbc87b",
+  "https://images.unsplash.com/photo-1593871075120-982e042088d8",
+  "https://images.unsplash.com/photo-1597633425046-08f5110420b5"
+];
+
 async function main() {
-    await prisma.$transaction([
-        prisma.tableContact.deleteMany(),
-        prisma.eventBanner.deleteMany(),
-        prisma.aboutContent.deleteMany(),
-        prisma.homeContent.deleteMany(),
-        prisma.donationGoals.deleteMany(),
-        prisma.volunteerAvailabilities.deleteMany(),
-        prisma.volunteerSkills.deleteMany(),
-        prisma.volunteers.deleteMany(),
-        prisma.eventAttendees.deleteMany(),
-        prisma.eventImages.deleteMany(),
-        prisma.events.deleteMany(),
-        prisma.donates.deleteMany(),
-        prisma.accommodationImages.deleteMany(),
-        prisma.adopts.deleteMany(),
-        prisma.petImages.deleteMany(),
-        prisma.pets.deleteMany(),
-        prisma.homeImages.deleteMany(),
-        prisma.users.deleteMany(),
-    ])
-    
+  await prisma.$transaction([
+    prisma.tableContact.deleteMany(),
+    prisma.eventBanner.deleteMany(),
+    prisma.aboutContent.deleteMany(),
+    prisma.homeContent.deleteMany(),
+    prisma.donationGoals.deleteMany(),
+    prisma.volunteerAvailabilities.deleteMany(),
+    prisma.volunteerSkills.deleteMany(),
+    prisma.volunteers.deleteMany(),
+    prisma.eventAttendees.deleteMany(),
+    prisma.eventImages.deleteMany(),
+    prisma.events.deleteMany(),
+    prisma.donates.deleteMany(),
+    prisma.accommodationImages.deleteMany(),
+    prisma.adopts.deleteMany(),
+    prisma.petImages.deleteMany(),
+    prisma.pets.deleteMany(),
+    prisma.homeImages.deleteMany(),
+    prisma.users.deleteMany(),
+    prisma.donationContent.deleteMany(),
+  ]);
 
   // Creating 15 users with different roles
   const users = await Promise.all(
@@ -272,43 +278,66 @@ async function main() {
   // Add home content sections
   const homeContent = await prisma.homeContent.create({
     data: {
-        image1: "/src/assets/dog.png",
-        image2: "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
-        image3: "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
-        content_en: "WELCOME TO OUR CLUB!|Join our community of pet lovers and discover everything you need to know about pet care, health, and happiness.|Care Advice|Expert guidance for pet parents|Veterinary Help|Professional health support|Our Tips|Daily care best practices",
-        content_th: "ยินดีต้อนรับสู่ชมรมของเรา!|เข้าร่วมชุมชนคนรักสัตว์เลี้ยงและค้นพบทุกสิ่งที่คุณต้องรู้เกี่ยวกับการดูแล สุขภาพ และความสุขของสัตว์เลี้ยง|คำแนะนำการดูแล|คำแนะนำจากผู้เชี่ยวชาญสำหรับผู้เลี้ยงสัตว์|ความช่วยเหลือด้านสัตวแพทย์|การสนับสนุนด้านสุขภาพจากมืออาชีพ|เคล็ดลับของเรา|แนวทางปฏิบัติที่ดีที่สุดในการดูแลประจำวัน"
-    }
-});
-
-
-  // Add about content sections
-  const aboutContent = await prisma.aboutContent.create({
-    data: {
-      image:
+      image1: "/src/assets/dog.png",
+      image2:
         "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
-      main_content_en: "Welcome to Friendly Paws",
-      main_content_th: "ยินดีต้อนรับสู่ Friendly Paws",
-      img_content_en: "Care Advice | Veterinary Help | Our Tips",
-      img_content_th: "คำแนะนำการดูแล | ความช่วยเหลือด้านสัตวแพทย์ | เคล็ดลับของเรา",
+      image3:
+        "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
+      content_en:
+        "WELCOME TO OUR CLUB!|Join our community of pet lovers and discover everything you need to know about pet care, health, and happiness.|Care Advice|Expert guidance for pet parents|Veterinary Help|Professional health support|Our Tips|Daily care best practices",
+      content_th:
+        "ยินดีต้อนรับสู่ชมรมของเรา!|เข้าร่วมชุมชนคนรักสัตว์เลี้ยงและค้นพบทุกสิ่งที่คุณต้องรู้เกี่ยวกับการดูแล สุขภาพ และความสุขของสัตว์เลี้ยง|คำแนะนำการดูแล|คำแนะนำจากผู้เชี่ยวชาญสำหรับผู้เลี้ยงสัตว์|ความช่วยเหลือด้านสัตวแพทย์|การสนับสนุนด้านสุขภาพจากมืออาชีพ|เคล็ดลับของเรา|แนวทางปฏิบัติที่ดีที่สุดในการดูแลประจำวัน",
     },
   });
 
-  // Add event banner
+  const donationContent = await prisma.donationContent.create({
+    data: {
+      title_en: "Make a Difference Today",
+      title_th: "ร่วมสร้างความเปลี่ยนแปลงวันนี้",
+      description_en: "Join us in making a difference in the lives of animals in need. Your support helps provide food, shelter, and medical care.",
+      description_th: "ร่วมเป็นส่วนหนึ่งในการช่วยเหลือสัตว์ที่ต้องการความช่วยเหลือ การสนับสนุนของคุณช่วยจัดหาที่พัก อาหาร และการรักษาพยาบาล",
+      typing_en:  "Your compassion could be a game changer|Every donation makes a difference|Help us give them a better life.",
+      typing_th:  "ความเมตตาของคุณสามารถเปลี่ยนชีวิตได้|การบริจาคทุกครั้งมีความหมาย|ช่วยเรามอบชีวิตใหม่ให้พวกเขา",
+      form_title_en: "Make a Donation",
+      form_title_th: "บริจาค",
+      form_desc_en: "Support our furry friends in need",
+      form_desc_th: "สนับสนุนเพื่อนขนฟูของเราที่ต้องการความช่วยเหลือ",
+      donation_options: JSON.stringify([
+        {
+          amount: 200,
+          benefit: "Provides food for 2 pets for a week",
+          icon: "🐱",
+        },
+        {
+          amount: 500,
+          benefit: "Covers basic veterinary check-up for 1 pet",
+          icon: "💉",
+        },
+        {
+          amount: 1000,
+          benefit: "Supports vaccination and medicine for 2 pets",
+          icon: "🏥",
+        },
+      ]),
+      custom_amount_en: "Custom Amount (THB)",
+      custom_amount_th: "จำนวนเงินที่กำหนดเอง (บาท)",
+      impact_message_en: "Your Impact:",
+      impact_message_th: "ผลกระทบของคุณ:",
+      donate_button_en: "Donate",
+      donate_button_th: "บริจาค",
+      close_button_en: "Close",
+      close_button_th: "ปิด"
+    },
+  });
+  
   const eventBanner = await prisma.eventBanner.create({
     data: {
-      image: "https://images.unsplash.com/photo-1539541417736-3d44c90da315",
-    },
+      image1: BANNER_IMAGES[0],
+      image2: BANNER_IMAGES[1],
+      image3: BANNER_IMAGES[2]
+    }
   });
-
-  // Add table contact information
-  const tableContact = await prisma.tableContact.create({
-    data: {
-      email: "contact@friendlypaws.com",
-      phone: "+66 2 123 4567",
-      address: "123 Pet Street, Bangkok 10110",
-      hours: "Mon-Fri: 9:00-18:00, Sat-Sun: 10:00-16:00",
-    },
-  });
+  
 
   console.log("Seed data created successfully!");
 }

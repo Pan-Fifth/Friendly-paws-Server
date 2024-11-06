@@ -16,6 +16,9 @@ const { createEvent } = require("../controllers/event-controller");
 const uploadMulter = require("../middlewares/upload-Event");
 const { authenticate } = require("../middlewares/authenticate");
 const adminHomePageController = require('../controllers/admin-homepage-controller')
+const donationPageController = require('../controllers/admin-donation-controller')
+const eventPageController = require('../controllers/admin-event-controller')
+const contactPageController = require('../controllers/admin-contact-controller')
 
 
 
@@ -51,10 +54,16 @@ router.get('/', getDonationGoals)
 router.put('/:year', updateDonationGoals)
 
 router.get('/home-content', adminHomePageController.getHomeContent)
-router.post('/home-content', upload.single('image'), adminHomePageController.createHomeContent)
 router.put('/home-content/:id',uploadFields, adminHomePageController.updateHomeContent)
 
+router.get('/donation-content', donationPageController.getDonationContent)
+router.put('/donation-content/:id', uploadFields, donationPageController.updateDonationContent)
 
+// router.get('/event-content', eventPageController.getEventContent)
+// router.put('/event-content/:id', uploadFields, eventPageController.updateEventContent)
+
+// router.get('/contact-content', contactPageController.getContactContent)
+// router.put('/contact-content/:id', uploadFields, contactPageController.updateContactContent)
 
 
 module.exports = router;
