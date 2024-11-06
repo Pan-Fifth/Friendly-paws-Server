@@ -9,21 +9,30 @@ const uploadFields = upload.fields([
 ]);
 
 const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/admin-controller");
-const { reportEventByDate, reportAllEvent, reportAdoptByDate,
-    reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList } = require('../controllers/admin-report-controller');
+
+const { reportEventByDate, reportAllEvent, reportAdoptByDate,reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList ,allAdoptRequest,checkScore} = require('../controllers/admin-report-controller');
 const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require('../controllers/admin-controller');
-const { createEvent } = require("../controllers/event-controller");
+const { createEvent, deleteEvent, updateEvent } = require("../controllers/event-controller");
 const uploadMulter = require("../middlewares/upload-Event");
 const { authenticate } = require("../middlewares/authenticate");
 const adminHomePageController = require('../controllers/admin-homepage-controller');
 const adminAboutPageController = require('../controllers/admin-about-controller');
 const adminContactController = require('../controllers/admin-contact-controller');  // เพิ่มการนำเข้า adminContactController
+const donationPageController = require('../controllers/admin-donation-controller')
+const eventPageController = require('../controllers/admin-event-controller')
+const contactPageController = require('../controllers/admin-contact-controller')
 
 // รายงาน
 router.get('/report-event', reportEventByDate);
 router.get('/report-event-all', reportAllEvent);
 router.get('/report-adopt', reportAdoptByDate);
 router.get('/report-adopt-all', reportAllAdopt);
+
+// all adopt request for adopt manage page
+router.get("/all-adopts/:count/:page",authenticate,allAdoptRequest)
+router.get("/score/:id/:lang",authenticate,checkScore)
+
+
 router.get('/report-donation', reportDonateByDate);
 router.get('/report-donation-all', reportAllDonate);
 router.get('/report-pet-all', reportAllPetList);
@@ -38,8 +47,10 @@ router.get('/dashboard', getDashboard);
 router.get('/manage-donation', getDonation);
 router.put('/manage-donation/:id', updateDonation);
 
-// สร้างอีเวนต์
-router.post('/events', authenticate, uploadMulter.single('image'), createEvent);
+// เพิ่ม routes สำหรับสร้างอีเวนต์
+router.post('/events', authenticate ,uploadMulter.single('image'), createEvent);
+router.patch('/updateEvent/:id',authenticate,updateEvent)
+router.delete('/deleteEvent/:id', authenticate, deleteEvent)
 
 // จัดการ Donation Goals
 router.get('/', getDonationGoals);
@@ -59,5 +70,22 @@ router.put('/about-content/:id', uploadFields, adminAboutPageController.updateAb
 router.get('/contact-info', adminContactController.getContactInfo);  // ดึงข้อมูล ContactInfo
 router.post('/contact-info', upload.single('image'), adminContactController.createContactInfo); // สร้างข้อมูลใหม่
 router.put('/contact-info/:id', uploadFields, adminContactController.updateContactInfo); // อัพเดทข้อมูล ContactInfo
+
+
+router.get('/', getDonationGoals)
+router.put('/:year', updateDonationGoals)
+
+router.get('/home-content', adminHomePageController.getHomeContent)
+router.put('/home-content/:id',uploadFields, adminHomePageController.updateHomeContent)
+
+router.get('/donation-content', donationPageController.getDonationContent)
+router.put('/donation-content/:id', uploadFields, donationPageController.updateDonationContent)
+
+router.get('/event-banner', eventPageController.getEventBanner)
+router.put('/event-banner/:id', uploadFields, eventPageController.updateEventBanner)
+
+// router.get('/contact-content', contactPageController.getContactContent)
+// router.put('/contact-content/:id', uploadFields, contactPageController.updateContactContent)
+
 
 module.exports = router;

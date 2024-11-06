@@ -1,7 +1,7 @@
 const createError = require('../utils/createError')
 const { getChooseEventBydate, getAllEvent, getChooseAdoptBydate, getAllAdopt,
-    getChooseDonateBydate, getAllDonate, getAllPetList } = require('../services/admin-report-service')
-
+    getChooseDonateBydate, getAllDonate, getAllPetList ,getAllAdoptRequest,getAdoptScore } = require('../services/admin-report-service')
+const {aiCalScore} = require('../services/ai-scoring')
 
 exports.reportEventByDate = async (req, res, next) => {
     try {
@@ -102,3 +102,32 @@ exports.reportAllPetList = async (req, res, next) => {
         res.status(500).json({ message: "Failed to fetch all pets", error: err.message });
     }
 };
+
+exports.allAdoptRequest = async (req,res,next)=>{
+    try {
+        const {count,page} = req.params
+        const user = req.user
+        if(user.role !== "ADMIN"){
+            return createError(401,"unauthorized")
+        }
+        const adoptRequest = await getAllAdoptRequest(count,page); 
+        res.json(adoptRequest) 
+    } catch (err) {
+        next(err)
+    }
+}
+
+exports.checkScore  = async(req,res,next)=>{
+    try {
+        const{id,lang}=req.params
+        if(req.user.role !== "ADMIN"){
+            return createError(402,"Unauthorized")
+        }
+        const adoptDetail = await getAdoptScore(id)
+        console.log(adoptDetail)
+        const score = await aiCalScore(adoptDetail,lang)
+        res.json(score)
+    } catch (err) {
+        next(err)
+    }
+}

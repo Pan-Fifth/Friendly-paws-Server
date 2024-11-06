@@ -32,14 +32,14 @@ exports.aiCalScore = async (formData,language) => {
         Please provide a score from 1-100 based on the suitability for adopting a pet.
         
         Just give me in using this JSON schema 
-        Message = {'shortDetail':string, 'score':string} 
+        message = {'shortDetail':string, 'score':string} 
         `; 
         }else{
         prompt = `
         พิจารณาความเหมาะสมของบุคคลในการรับเลี้ยงสัตว์จากข้อมูลดังนี้:
         
         - อาชีพ: ${formData.career}
-        - เวลาทำงาน: ${formData.workTime} ชั่วโมง/วัน
+        - เวลาทำงานเวลา: ${formData.workTime} /วัน
         - วันหยุด: ${formData.dayOff} วัน/สัปดาห์
         - เงินเดือน: ${formData.salary} ต่อเดือน
         - วันเกิด: ${formData.dateOfBirth}
@@ -51,17 +51,12 @@ exports.aiCalScore = async (formData,language) => {
         - มีสวน: ${formData.hasGarden}
         - มีรั้ว: ${formData.hasFence}
         - สามารถพาสุนัขเดินเล่นได้หรือไม่: ${formData.canWalkDog}
-        - เหตุผลในการรับเลี้ยงสัตว์: ${formData.reasonToAdopt}
+        - เหตุผลในการรับเลี้ยงสัตว์: ${formData.why}
         
         โปรดให้คะแนนความเหมาะสมในการรับเลี้ยงสัตว์จาก 1-100 ตามปัจจัยต่างๆ เช่น ตารางเวลาทำงาน, สถานการณ์ครอบครัว, การอยู่อาศัย, สถานะทางการเงิน, และความสามารถในการดูแลสัตว์เลี้ยง
         
         กรุณาตอบในรูปแบบ JSON ดังนี้:
-        {
-          "Message": {
-            "shortDetail": "<ข้อความสั้นอธิบาย>",
-            "score": "<คะแนน 1-100>"
-          }
-        }
+        message = {'shortDetail':string, 'score':string} 
         `; 
         }
        

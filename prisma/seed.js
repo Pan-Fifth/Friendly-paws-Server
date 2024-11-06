@@ -55,28 +55,34 @@ const EVENT_IMAGES = [
   "https://images.unsplash.com/photo-1517457373958-b7bdd4587205",
 ];
 
+const BANNER_IMAGES = [
+  "https://images.unsplash.com/photo-1548199973-03cce0bbc87b",
+  "https://images.unsplash.com/photo-1593871075120-982e042088d8",
+  "https://images.unsplash.com/photo-1597633425046-08f5110420b5"
+];
+
 async function main() {
-    await prisma.$transaction([
-        prisma.tableContact.deleteMany(),
-        prisma.eventBanner.deleteMany(),
-        prisma.aboutContent.deleteMany(),
-        prisma.homeContent.deleteMany(),
-        prisma.donationGoals.deleteMany(),
-        prisma.volunteerAvailabilities.deleteMany(),
-        prisma.volunteerSkills.deleteMany(),
-        prisma.volunteers.deleteMany(),
-        prisma.eventAttendees.deleteMany(),
-        prisma.eventImages.deleteMany(),
-        prisma.events.deleteMany(),
-        prisma.donates.deleteMany(),
-        prisma.accommodationImages.deleteMany(),
-        prisma.adopts.deleteMany(),
-        prisma.petImages.deleteMany(),
-        prisma.pets.deleteMany(),
-        prisma.homeImages.deleteMany(),
-        prisma.users.deleteMany(),
-    ])
-    
+  await prisma.$transaction([
+    prisma.tableContact.deleteMany(),
+    prisma.eventBanner.deleteMany(),
+    prisma.aboutContent.deleteMany(),
+    prisma.homeContent.deleteMany(),
+    prisma.donationGoals.deleteMany(),
+    prisma.volunteerAvailabilities.deleteMany(),
+    prisma.volunteerSkills.deleteMany(),
+    prisma.volunteers.deleteMany(),
+    prisma.eventAttendees.deleteMany(),
+    prisma.eventImages.deleteMany(),
+    prisma.events.deleteMany(),
+    prisma.donates.deleteMany(),
+    prisma.accommodationImages.deleteMany(),
+    prisma.adopts.deleteMany(),
+    prisma.petImages.deleteMany(),
+    prisma.pets.deleteMany(),
+    prisma.homeImages.deleteMany(),
+    prisma.users.deleteMany(),
+    prisma.donationContent.deleteMany(),
+  ]);
 
   // Creating 15 users with different roles
   const users = await Promise.all(
@@ -92,6 +98,9 @@ async function main() {
             lastname: `LastName${i + 1}`,
             phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
             role,
+            googleId: null,
+            resettoken: null,
+            resettokenExpire: null
           },
         });
       })
@@ -111,10 +120,12 @@ async function main() {
             color: ["Brown", "Black", "White", "Golden", "Grey"][Math.floor(Math.random() * 5)],
             gender: Math.random() > 0.5 ? "MALE" : "FEMALE",
             type: isDog ? "DOG" : "CAT",
+            status: ["AVAILABLE", "PENDING", "ADOPTED", "FOSTERED", "UNAVAILABLE"][Math.floor(Math.random() * 5)],
             breed_en: isDog ? "Golden Retriever" : "Persian",
             breed_th: isDog ? "โกลเด้น รีทรีฟเวอร์" : "เปอร์เซีย",
             description_en: `Lovely ${isDog ? "dog" : "cat"} looking for a forever home`,
             description_th: `${isDog ? "สุนัข" : "แมว"}น่ารักกำลังมองหาบ้าน`,
+            medical_history: "Healthy and vaccinated",
             is_vaccinated: Math.random() > 0.3,
             is_neutered: Math.random() > 0.3,
             weight: 10 + Math.random() * 20,
@@ -130,7 +141,7 @@ async function main() {
   );
 
   // Creating 12 adoption applications
-  const adoptions = await Promise.all(
+  const adopts = await Promise.all(
     Array(12)
       .fill()
       .map(async (_, i) => {
@@ -140,38 +151,32 @@ async function main() {
             petId: pets[Math.floor(Math.random() * pets.length)].id,
             status: ["PENDING", "ADOPTED", "FOSTERED"][Math.floor(Math.random() * 3)],
             address: `${i + 1} Bangkok Street, District ${i + 1}`,
-            career: ["Engineer", "Teacher", "Doctor", "Business Owner"][
-              Math.floor(Math.random() * 4)
-            ],
+            career: ["Engineer", "Teacher", "Doctor", "Business Owner"][Math.floor(Math.random() * 4)],
             workTime: "9:00-18:00",
             workPlace: `Company ${i + 1}`,
             dayOff: "Saturday-Sunday",
             salary: 30000 + Math.floor(Math.random() * 70000),
-            dateOfBirth: new Date(
-              1980 + Math.floor(Math.random() * 20),
-              Math.floor(Math.random() * 12),
-              1
-            ),
+            dateOfBirth: new Date(1980 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), 1),
             socialContact: `line: user${i + 1}`,
             currentPetCount: Math.floor(Math.random() * 3),
             currentPetDetails: "Previous experience with pets",
             familyMemberCount: 1 + Math.floor(Math.random() * 5),
             familyAlwaysHome: Math.random() > 0.5,
             aloneHours: Math.floor(Math.random() * 8),
-            housingType: [
-              "OWN_HOUSE",
-              "RENTAL_HOUSE",
-              "CONDO",
-              "APARTMENT",
-              "RENTAL_ROOM",
-              "SINGLE_HOUSE",
-            ][Math.floor(Math.random() * 6)],
+            housingType: ["OWN_HOUSE", "RENTAL_HOUSE", "CONDO", "APARTMENT", "RENTAL_ROOM", "SINGLE_HOUSE"][Math.floor(Math.random() * 6)],
             hasGarden: Math.random() > 0.5,
             hasFence: Math.random() > 0.5,
             canWalkDog: Math.random() > 0.2,
             deliveryType: Math.random() > 0.5 ? "PICK_UP" : "REQUIRE_DELIVERY",
+            approved_at: Math.random() > 0.5 ? new Date() : null,
+            approved_by: Math.random() > 0.5 ? users[0].id : null,
+            why: "Adoption reason here",
+            home_image_checked: Math.random() > 0.5,
             accommodationImages: {
-              create: [{ url: HOME_IMAGES[i % 10] }, { url: HOME_IMAGES[(i + 1) % 10] }],
+              create: [
+                { url: HOME_IMAGES[i % 10] },
+                { url: HOME_IMAGES[(i + 1) % 10] }
+              ],
             },
           },
         });
@@ -253,7 +258,7 @@ async function main() {
       .map(async (_, i) => {
         return prisma.homeImages.create({
           data: {
-            userId: users[Math.floor(Math.random() * users.length)].id,
+            adoptId: adopts[Math.floor(Math.random() * adopts.length)].id,
             url: HOME_IMAGES[i],
           },
         });
@@ -272,43 +277,66 @@ async function main() {
   // Add home content sections
   const homeContent = await prisma.homeContent.create({
     data: {
-        image1: "/src/assets/dog.png",
-        image2: "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
-        image3: "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
-        content_en: "WELCOME TO OUR CLUB!|Join our community of pet lovers and discover everything you need to know about pet care, health, and happiness.|Care Advice|Expert guidance for pet parents|Veterinary Help|Professional health support|Our Tips|Daily care best practices",
-        content_th: "ยินดีต้อนรับสู่ชมรมของเรา!|เข้าร่วมชุมชนคนรักสัตว์เลี้ยงและค้นพบทุกสิ่งที่คุณต้องรู้เกี่ยวกับการดูแล สุขภาพ และความสุขของสัตว์เลี้ยง|คำแนะนำการดูแล|คำแนะนำจากผู้เชี่ยวชาญสำหรับผู้เลี้ยงสัตว์|ความช่วยเหลือด้านสัตวแพทย์|การสนับสนุนด้านสุขภาพจากมืออาชีพ|เคล็ดลับของเรา|แนวทางปฏิบัติที่ดีที่สุดในการดูแลประจำวัน"
+      image1: "/src/assets/dog.png",
+      image2:
+        "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
+      image3:
+        "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
+      content_en:
+        "WELCOME TO OUR CLUB!|Join our community of pet lovers and discover everything you need to know about pet care, health, and happiness.|Care Advice|Expert guidance for pet parents|Veterinary Help|Professional health support|Our Tips|Daily care best practices",
+      content_th:
+        "ยินดีต้อนรับสู่ชมรมของเรา!|เข้าร่วมชุมชนคนรักสัตว์เลี้ยงและค้นพบทุกสิ่งที่คุณต้องรู้เกี่ยวกับการดูแล สุขภาพ และความสุขของสัตว์เลี้ยง|คำแนะนำการดูแล|คำแนะนำจากผู้เชี่ยวชาญสำหรับผู้เลี้ยงสัตว์|ความช่วยเหลือด้านสัตวแพทย์|การสนับสนุนด้านสุขภาพจากมืออาชีพ|เคล็ดลับของเรา|แนวทางปฏิบัติที่ดีที่สุดในการดูแลประจำวัน",
+    },
+  });
+
+  const donationContent = await prisma.donationContent.create({
+    data: {
+      title_en: "Make a Difference Today",
+      title_th: "ร่วมสร้างความเปลี่ยนแปลงวันนี้",
+      description_en: "Join us in making a difference in the lives of animals in need. Your support helps provide food, shelter, and medical care.",
+      description_th: "ร่วมเป็นส่วนหนึ่งในการช่วยเหลือสัตว์ที่ต้องการความช่วยเหลือ การสนับสนุนของคุณช่วยจัดหาที่พัก อาหาร และการรักษาพยาบาล",
+      typing_en:  "Your compassion could be a game changer|Every donation makes a difference|Help us give them a better life.",
+      typing_th:  "ความเมตตาของคุณสามารถเปลี่ยนชีวิตได้|การบริจาคทุกครั้งมีความหมาย|ช่วยเรามอบชีวิตใหม่ให้พวกเขา",
+      form_title_en: "Make a Donation",
+      form_title_th: "บริจาค",
+      form_desc_en: "Support our furry friends in need",
+      form_desc_th: "สนับสนุนเพื่อนขนฟูของเราที่ต้องการความช่วยเหลือ",
+      donation_options: JSON.stringify([
+        {
+          amount: 200,
+          benefit: "Provides food for 2 pets for a week",
+          icon: "🐱",
+        },
+        {
+          amount: 500,
+          benefit: "Covers basic veterinary check-up for 1 pet",
+          icon: "💉",
+        },
+        {
+          amount: 1000,
+          benefit: "Supports vaccination and medicine for 2 pets",
+          icon: "🏥",
+        },
+      ]),
+      custom_amount_en: "Custom Amount (THB)",
+      custom_amount_th: "จำนวนเงินที่กำหนดเอง (บาท)",
+      impact_message_en: "Your Impact:",
+      impact_message_th: "ผลกระทบของคุณ:",
+      donate_button_en: "Donate",
+      donate_button_th: "บริจาค",
+      close_button_en: "Close",
+      close_button_th: "ปิด"
+    },
+  });
+  
+  const eventBanner = await prisma.eventBanner.create({
+    data: {
+      image1: BANNER_IMAGES[0],
+      image2: BANNER_IMAGES[1],
+      image3: BANNER_IMAGES[2]
     }
-});
-
-
-  // Add about content sections
-  // const aboutContent = await prisma.aboutContent.create({
-  //   data: {
-  //     image:
-  //       "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
-  //     main_content_en: "Welcome to Friendly Paws",
-  //     main_content_th: "ยินดีต้อนรับสู่ Friendly Paws",
-  //     img_content_en: "Care Advice | Veterinary Help | Our Tips",
-  //     img_content_th: "คำแนะนำการดูแล | ความช่วยเหลือด้านสัตวแพทย์ | เคล็ดลับของเรา",
-  //   },
-  // });
-
-  // Add event banner
-  // const eventBanner = await prisma.eventBanner.create({
-  //   data: {
-  //     image: "https://images.unsplash.com/photo-1539541417736-3d44c90da315",
-  //   },
-  // });
-
-  // // Add table contact information
-  // const tableContact = await prisma.tableContact.create({
-  //   data: {
-  //     email: "contact@friendlypaws.com",
-  //     phone: "+66 2 123 4567",
-  //     address: "123 Pet Street, Bangkok 10110",
-  //     hours: "Mon-Fri: 9:00-18:00, Sat-Sun: 10:00-16:00",
-  //   },
-  // });
+  });
+  
 
   console.log("Seed data created successfully!");
 }

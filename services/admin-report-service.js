@@ -3,11 +3,17 @@ const prisma = require("../configs/prisma");
 
 exports.getChooseEventBydate = async (startDate, endDate) => {
     try {
-        const start = new Date(`${startDate}T00:00:00.000Z`);
-        const end = new Date(`${endDate}T23:59:59.999Z`);
+        const checkDate = new Date(startDate) - new Date(endDate)
+        let start;
+        let end;
+        if (checkDate < 0) {
+            start = new Date(`${startDate}T00:00:00.000Z`);
+            end = new Date(`${endDate}T23:59:59.999Z`);
+        } else {
+            start = new Date(`${endDate}T00:00:00.000Z`);
+            end = new Date(`${startDate}T23:59:59.999Z`);
+        }
 
-        console.log('Start Date (UTC):', start);
-        console.log('End Date (UTC):', end);
 
         const events = await prisma.events.findMany({
             where: {
@@ -74,12 +80,19 @@ exports.getAllEvent = async () => {
 
 
 exports.getChooseAdoptBydate = async (startDate, endDate) => {
-    try {
-        const start = new Date(`${startDate}T00:00:00.000Z`);
-        const end = new Date(`${endDate}T23:59:59.999Z`);
 
-        console.log('Start Date (UTC):', start);
-        console.log('End Date (UTC):', end);
+    try {
+        const checkDate = new Date(startDate) - new Date(endDate)
+        let start;
+        let end;
+        if (checkDate < 0) {
+            start = new Date(`${startDate}T00:00:00.000Z`);
+            end = new Date(`${endDate}T23:59:59.999Z`);
+        } else {
+            start = new Date(`${endDate}T00:00:00.000Z`);
+            end = new Date(`${startDate}T23:59:59.999Z`);
+        }
+
 
         const adopts = await prisma.adopts.findMany({
             where: {
@@ -177,11 +190,16 @@ exports.getAllAdopt = async () => {
 
 exports.getChooseDonateBydate = async (startDate, endDate) => {
     try {
-        const start = new Date(`${startDate}T00:00:00.000Z`);
-        const end = new Date(`${endDate}T23:59:59.999Z`);
-
-        console.log('Start Date (UTC):', start);
-        console.log('End Date (UTC):', end);
+        const checkDate = new Date(startDate) - new Date(endDate)
+        let start;
+        let end;
+        if (checkDate < 0) {
+            start = new Date(`${startDate}T00:00:00.000Z`);
+            end = new Date(`${endDate}T23:59:59.999Z`);
+        } else {
+            start = new Date(`${endDate}T00:00:00.000Z`);
+            end = new Date(`${startDate}T23:59:59.999Z`);
+        }
 
         const donation = await prisma.donates.findMany({
             where: {
@@ -285,3 +303,73 @@ exports.getAllPetList = async () => {
         throw new Error("Failed to fetch pets");
     }
 };
+
+exports.getAllAdoptRequest = async (count, page) => {
+    try {
+        const result = await prisma.adopts.findMany({
+            orderBy: { id: "desc" },
+            take: +count,
+            skip: ((+page) - 1) * count,
+            select: {
+                career: true,
+                address:true,
+                workTime: true,
+                workPlace: true,
+                dayOff: true,
+                salary: true,
+                socialContact: true,
+                familyMemberCount: true,
+                familyAlwaysHome: true,
+                aloneHours: true,
+                housingType: true,
+                hasGarden: true,
+                hasFence: true,
+                canWalkDog: true,
+                deliveryType: true,
+                user: {
+                    select: {
+                        email: true,
+                        firstname: true,
+                        lastname: true,
+                        phone: true,
+                        email: true,
+                    }
+                },
+                pet: {
+                    select: {
+                        name_th: true,
+                        image: {
+                            take: 1,
+                            select: {
+                                url: true
+                            }
+                        }
+                    }
+                },
+                HomeImages:{
+                    select:{
+                        url:true
+                    }
+                }
+            }
+        })
+        return result
+    } catch (err) {
+        console.log("err getAllAdoptRequest", err);
+        throw new Error("Failed to fetch AllAdoptRequest");
+    }
+}
+
+exports.getAdoptScore = async (id) => {
+    try {
+        const result = prisma.adopts.findFirst({
+            where: {
+                id: +id
+            }
+        })
+        return result;
+    } catch (err) {
+        console.log("err adoptScore", err);
+        throw new Error("Failed to AI determind score");
+    }
+}
