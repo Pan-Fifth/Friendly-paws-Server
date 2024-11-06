@@ -282,33 +282,33 @@ async function main() {
 
 
   // Add about content sections
-  const aboutContent = await prisma.aboutContent.create({
-    data: {
-      image:
-        "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
-      main_content_en: "Welcome to Friendly Paws",
-      main_content_th: "ยินดีต้อนรับสู่ Friendly Paws",
-      img_content_en: "Care Advice | Veterinary Help | Our Tips",
-      img_content_th: "คำแนะนำการดูแล | ความช่วยเหลือด้านสัตวแพทย์ | เคล็ดลับของเรา",
-    },
-  });
+  // const aboutContent = await prisma.aboutContent.create({
+  //   data: {
+  //     image:
+  //       "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
+  //     main_content_en: "Welcome to Friendly Paws",
+  //     main_content_th: "ยินดีต้อนรับสู่ Friendly Paws",
+  //     img_content_en: "Care Advice | Veterinary Help | Our Tips",
+  //     img_content_th: "คำแนะนำการดูแล | ความช่วยเหลือด้านสัตวแพทย์ | เคล็ดลับของเรา",
+  //   },
+  // });
 
   // Add event banner
-  const eventBanner = await prisma.eventBanner.create({
-    data: {
-      image: "https://images.unsplash.com/photo-1539541417736-3d44c90da315",
-    },
-  });
+  // const eventBanner = await prisma.eventBanner.create({
+  //   data: {
+  //     image: "https://images.unsplash.com/photo-1539541417736-3d44c90da315",
+  //   },
+  // });
 
-  // Add table contact information
-  const tableContact = await prisma.tableContact.create({
-    data: {
-      email: "contact@friendlypaws.com",
-      phone: "+66 2 123 4567",
-      address: "123 Pet Street, Bangkok 10110",
-      hours: "Mon-Fri: 9:00-18:00, Sat-Sun: 10:00-16:00",
-    },
-  });
+  // // Add table contact information
+  // const tableContact = await prisma.tableContact.create({
+  //   data: {
+  //     email: "contact@friendlypaws.com",
+  //     phone: "+66 2 123 4567",
+  //     address: "123 Pet Street, Bangkok 10110",
+  //     hours: "Mon-Fri: 9:00-18:00, Sat-Sun: 10:00-16:00",
+  //   },
+  // });
 
   console.log("Seed data created successfully!");
 }
