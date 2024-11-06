@@ -61,8 +61,8 @@ router.put('/home-content/:id',uploadFields, adminHomePageController.updateHomeC
 router.get('/donation-content', donationPageController.getDonationContent)
 router.put('/donation-content/:id', uploadFields, donationPageController.updateDonationContent)
 
-// router.get('/event-content', eventPageController.getEventContent)
-// router.put('/event-content/:id', uploadFields, eventPageController.updateEventContent)
+router.get('/event-banner', eventPageController.getEventBanner)
+router.put('/event-banner/:id', uploadFields, eventPageController.updateEventBanner)
 
 // router.get('/contact-content', contactPageController.getContactContent)
 // router.put('/contact-content/:id', uploadFields, contactPageController.updateContactContent)

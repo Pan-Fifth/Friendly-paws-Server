@@ -16,11 +16,23 @@ const eventPageController = {
       const { id } = req.params
       const files = req.files
 
+      // Get current banner to extract old image URLs
+      const currentBanner = await prisma.eventBanner.findUnique({
+        where: { id: parseInt(id) }
+      })
+
       let imageUrls = {}
 
       if (files) {
         for (const [key, file] of Object.entries(files)) {
-          const result = await cloudinary.upload(file[0].path)
+          // If there's an existing image, delete it from Cloudinary
+          if (currentBanner[key]) {
+            const publicId = currentBanner[key].split('/').pop().split('.')[0]
+            await cloudinary.uploader.destroy(publicId)
+          }
+
+          // Upload new image
+          const result = await cloudinary.uploader.upload(file[0].path)
           imageUrls[key] = result.secure_url
         }
       }
