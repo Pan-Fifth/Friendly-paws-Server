@@ -10,7 +10,7 @@ const uploadFields = upload.fields([
 
 const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/admin-controller");
 
-const { reportEventByDate, reportAllEvent, reportAdoptByDate,reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList ,allAdoptRequest,checkScore} = require('../controllers/admin-report-controller');
+const { reportEventByDate, reportAllEvent, reportAdoptByDate, reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList, allAdoptRequest, checkScore } = require('../controllers/admin-report-controller');
 const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require('../controllers/admin-controller');
 const { createEvent, deleteEvent, updateEvent } = require("../controllers/event-controller");
 const uploadMulter = require("../middlewares/upload-Event");
@@ -29,8 +29,8 @@ router.get('/report-adopt', reportAdoptByDate);
 router.get('/report-adopt-all', reportAllAdopt);
 
 // all adopt request for adopt manage page
-router.get("/all-adopts/:count/:page",authenticate,allAdoptRequest)
-router.get("/score/:id/:lang",authenticate,checkScore)
+router.get("/all-adopts/:count/:page", authenticate, allAdoptRequest)
+router.get("/score/:id/:lang", authenticate, checkScore)
 
 
 router.get('/report-donation', reportDonateByDate);
@@ -48,8 +48,8 @@ router.get('/manage-donation', getDonation);
 router.put('/manage-donation/:id', updateDonation);
 
 // เพิ่ม routes สำหรับสร้างอีเวนต์
-router.post('/events', authenticate ,uploadMulter.single('image'), createEvent);
-router.patch('/updateEvent/:id',authenticate,updateEvent)
+router.post('/events', authenticate, uploadMulter.single('image'), createEvent);
+router.patch('/updateEvent/:id', authenticate, updateEvent)
 router.delete('/deleteEvent/:id', authenticate, deleteEvent)
 
 // จัดการ Donation Goals
@@ -58,7 +58,7 @@ router.put('/:year', updateDonationGoals);
 
 // จัดการข้อมูลหน้า Home
 router.get('/home-content', adminHomePageController.getHomeContent);
-router.post('/home-content', upload.single('image'), adminHomePageController.createHomeContent);
+// router.post('/home-content', upload.single('image'), adminHomePageController.createHomeContent);
 router.put('/home-content/:id', uploadFields, adminHomePageController.updateHomeContent);
 
 // จัดการข้อมูล About Content
