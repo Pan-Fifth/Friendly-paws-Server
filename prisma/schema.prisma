@@ -177,7 +177,7 @@ model AccommodationImages {
 
 model Donates {
   id             Int           @id @default(autoincrement())
-  userId         Int?           @map("user_id")
+  userId         Int?          @map("user_id")
   total          Int
   payment_method paymentMethod
   transaction_id String        @unique
@@ -272,13 +272,51 @@ model VolunteerAvailabilities {
 }
 
 model DonationGoals {
-  id            Int      @id @default(autoincrement())
-  year          Int      @unique
-  targetAmount  Int
-  targetPets    Int
-  petsHelped    Int      @default(0)
-  created_at    DateTime @default(now()) @db.Timestamp(0)
-  updated_at    DateTime @updatedAt @db.Timestamp(0) @default(now())
-} 
+  id           Int      @id @default(autoincrement())
+  year         Int      @unique
+  targetAmount Int
+  targetPets   Int
+  petsHelped   Int      @default(0)
+  created_at   DateTime @default(now()) @db.Timestamp(0)
+  updated_at   DateTime @default(now()) @updatedAt @db.Timestamp(0)
+}
 
+model HomeContent {
+  id         Int    @id @default(autoincrement())
+  image1     String
+  image2     String
+  image3     String
+  content_en String @db.LongText //header, subtitle, img1 title, img1 content, img2 title, img2 content, img3 title, img3 content
+  content_th String @db.LongText
+}
+
+model AboutContent {
+  id              Int    @id @default(autoincrement())
+  video_url       String
+  header_en       String @db.Text
+  header_th       String @db.Text
+  description_en  String @db.Text 
+  description_th  String @db.Text
+  help_title_en   String
+  help_title_th   String
+  help_content_en String @db.Text
+  help_content_th String @db.Text
+  image           String
+}
+
+
+model EventBanner {
+  id    Int    @id @default(autoincrement())
+  image1 String 
+  image2 String?
+  image3 String?
+}
+
+model TableContact {
+  id      Int    @id @default(autoincrement())
+  email   String
+  phone   String
+  address String
+  hours   String
+}
 

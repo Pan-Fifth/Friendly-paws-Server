@@ -5,6 +5,7 @@ const fs = require('fs/promises');
 const path = require('path');
 
 
+
 exports.eventShowPages = async (req, res) => {
 
     const language = req.headers['accept-language'] || 'en';

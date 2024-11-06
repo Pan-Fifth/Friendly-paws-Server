@@ -1,5 +1,12 @@
 const express = require("express");
 const router = express.Router();
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' })
+const uploadFields = upload.fields([
+    { name: 'image1', maxCount: 1 },
+    { name: 'image2', maxCount: 1 },
+    { name: 'image3', maxCount: 1 }
+  ]);
 const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/admin-controller");
 
 const { reportEventByDate, reportAllEvent, reportAdoptByDate,
@@ -8,6 +15,8 @@ const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonat
 const { createEvent, deleteEvent, updateEvent } = require("../controllers/event-controller");
 const uploadMulter = require("../middlewares/upload-Event");
 const { authenticate } = require("../middlewares/authenticate");
+const adminHomePageController = require('../controllers/admin-homepage-controller')
+
 
 
 router.get('/report-event', reportEventByDate);
@@ -42,5 +51,12 @@ router.delete('/deleteEvent/:id', authenticate, deleteEvent)
 
 router.get('/', getDonationGoals)
 router.put('/:year', updateDonationGoals)
+
+router.get('/home-content', adminHomePageController.getHomeContent)
+router.post('/home-content', upload.single('image'), adminHomePageController.createHomeContent)
+router.put('/home-content/:id',uploadFields, adminHomePageController.updateHomeContent)
+
+
+
 
 module.exports = router;
