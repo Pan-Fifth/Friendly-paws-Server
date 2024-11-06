@@ -8,9 +8,9 @@ const path = require('path');
 
 exports.eventShowPages = async (req, res) => {
 
-    const language = req.headers['accept-language'] || 'en';
-    const titleField = language === 'th' ? 'title_th' : 'title_en';
-    const descriptionField = language === 'th' ? 'description_th' : 'description_en';
+    // const language = req.headers['accept-language'] || 'en';
+    // const titleField = language === 'th' ? 'title_th' : 'title_en';
+    // const descriptionField = language === 'th' ? 'description_th' : 'description_en';
 
     try {
 
@@ -33,8 +33,12 @@ exports.eventShowPages = async (req, res) => {
                 location: true,
                 date_start: true,
                 date_end: true,
-                [titleField]: true,
-                [descriptionField]: true,
+                title_en: true,
+                title_th: true,
+                description_en: true,
+                description_th: true,
+                // [titleField]: true,
+                // [descriptionField]: true,
                 image: { select: { url: true } },
             },
         });
@@ -51,22 +55,27 @@ exports.eventShowPages = async (req, res) => {
                 location: true,
                 date_start: true,
                 date_end: true,
-                [titleField]: true,
-                [descriptionField]: true,
+                title_en: true,
+                title_th: true,
+                description_en: true,
+                description_th: true,
+                // [titleField]: true,
+                // [descriptionField]: true,
                 image: { select: { url: true } },
             },
         });
-        const formattedPastEvent = pastEvent.map(event => ({
-            ...event,
-            title: event[titleField],
-            description: event[descriptionField],
-        }));
-        const formattedEvent = events.map(event => ({
-            ...event,
-            title: event[titleField],
-            description: event[descriptionField],
-        }));
-        res.status(200).json({ events: formattedEvent, pastEvent: formattedPastEvent, allEvent });
+        // const formattedPastEvent = pastEvent.map(event => ({
+        //     ...event,
+        //     title: event[titleField],
+        //     description: event[descriptionField],
+        // }));
+        // const formattedEvent = events.map(event => ({
+        //     ...event,
+        //     title: event[titleField],
+        //     description: event[descriptionField],
+        // }));
+        // res.status(200).json({ events: formattedEvent, pastEvent: formattedPastEvent, allEvent });
+        res.status(200).json({ events, pastEvent, allEvent });
     } catch (error) {
         res.status(500).json({ message: "eventShowPages error", error: error.message });
     }

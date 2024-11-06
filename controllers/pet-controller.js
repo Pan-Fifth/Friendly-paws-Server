@@ -55,6 +55,7 @@ exports.aPets = async (req, res, next) => {
             select: {
                 id: true,
                 name_en: true,
+                name_th: true,
                 age: true,
                 gender: true,
                 weight: true,
