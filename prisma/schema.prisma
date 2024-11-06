@@ -318,3 +318,30 @@ model TableContact {
   address String
   hours   String
 }
+
+model DonationContent {
+  id                  Int    @id @default(autoincrement())
+  title_en            String
+  title_th            String
+  description_en      String @db.Text
+  description_th      String @db.Text
+  typing_en           String
+  typing_th           String
+  form_title_en       String
+  form_title_th       String
+  form_desc_en        String
+  form_desc_th        String
+  donation_options    Json   // Store the array of donation options with amounts, benefits and icons
+  custom_amount_en    String
+  custom_amount_th    String
+  impact_message_en   String @db.Text
+  impact_message_th   String @db.Text
+  donate_button_en    String
+  donate_button_th    String
+  close_button_en     String
+  close_button_th     String
+}
+ 
+
+
+
