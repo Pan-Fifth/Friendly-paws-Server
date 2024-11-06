@@ -16,6 +16,12 @@ exports.eventShowPages = async (req, res) => {
 
         const today = new Date();
         const allEvent = await prisma.events.findMany({
+            where:{
+                OR: [
+                    { status: "ACTIVE" },
+                    { status: "PENDING" }
+                ]
+            },
             include: {
                 image: true,
             }
@@ -24,7 +30,8 @@ exports.eventShowPages = async (req, res) => {
             where: {
                 date_start: {
                     lte: today,
-                }
+                },
+                status: "COMPLETED"
             },
             select: {
                 id: true,
@@ -40,7 +47,9 @@ exports.eventShowPages = async (req, res) => {
             where: {
                 date_start: {
                     gte: today,
-                }
+                },
+                status: "ACTIVE"
+
             },
             select: {
                 id: true,
@@ -115,7 +124,7 @@ exports.regisEvent = async (req, res, next) => {
 
 
 exports.createEvent = async (req, res, next) => {
-    try  {
+    try {
         const { title_en, title_th, date_start, date_end, description_en, description_th, location } = req.body;
         console.log("req.body", req.body)
 
@@ -177,13 +186,16 @@ exports.createEvent = async (req, res, next) => {
 exports.deleteEvent = async (req, res, next) => {
     try {
         const { id } = req.params;
+        console.log("ขอดู ID", id)
         const event = await prisma.events.findUnique({
             where: {
                 id: +id,
             },
         });
+        console.log(event)
         if (!event) {
-            return res.status(404).json({ message: "Event not found" });
+            return res.status(404).json({ message: "Event---- not found" });
+
         }
         // ตรวจสอบสิทธิ์การเข้าถึง
         if (req.user.role !== "ADMIN") {
@@ -196,9 +208,47 @@ exports.deleteEvent = async (req, res, next) => {
             },
         });
         res.status(200).json({ message: "Event deleted successfully" });
-    } catch  (error) {
+    } catch (error) {
         console.log(error)
         next(error);
     }
 }
 
+
+exports.updateEvent = async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const { title_en, title_th, description_en, description_th, date_start, date_end, location } = req.body;
+
+        const event = await prisma.events.findUnique({
+            where: {
+                id: +id
+            }
+        });
+        
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        const updatedEvent = await prisma.events.update({
+            where: {
+                id: +id
+            },
+            data: {
+                title_en,
+                title_th,
+                description_en,
+                description_th,
+                date_start: new Date(date_start),
+                date_end: new Date(date_end),
+                location,
+            }
+        });
+
+        res.status(200).json({ message: "Event updated successfully", data: updatedEvent });
+    } catch (error) {
+        console.error("Error updating event:", error);
+        res.status(500).json({ message: "An error occurred while updating the event" });
+        next(error);
+    }
+};
