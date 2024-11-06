@@ -286,25 +286,50 @@ exports.getAllPetList = async () => {
     }
 };
 
-exports.getAllAdoptRequest = async()=>{
+exports.getAllAdoptRequest = async (count, page) => {
     try {
         const result = await prisma.adopts.findMany({
-            include:{
-                user:{
-                    select:{
-                        email:true,
-                    firstname:true,
-                    phone:true,
-                    email:true
-                    }
-                },
-                pet:{
-                    select:{
-                        name_en:true,
-                        name_th:true,
-                        image:{
+            orderBy: { id: "desc" },
+            take: +count,
+            skip: ((+page) - 1) * count,
+            select: {
+                career: true,
+                address:true,
+                workTime: true,
+                workPlace: true,
+                dayOff: true,
+                salary: true,
+                socialContact: true,
+                familyMemberCount: true,
+                familyAlwaysHome: true,
+                aloneHours: true,
+                housingType: true,
+                hasGarden: true,
+                hasFence: true,
+                canWalkDog: true,
+                deliveryType: true,
+                user: {
+                    select: {
+                        email: true,
+                        firstname: true,
+                        lastname: true,
+                        phone: true,
+                        email: true,
+                        HomeImage:{
                             select:{
                                 url:true
+                            }
+
+                        }
+                    }
+                },
+                pet: {
+                    select: {
+                        name_th: true,
+                        image: {
+                            take: 1,
+                            select: {
+                                url: true
                             }
                         }
                     }
@@ -313,7 +338,21 @@ exports.getAllAdoptRequest = async()=>{
         })
         return result
     } catch (err) {
-        console.error("err getAllAdoptRequest", error);
+        console.log("err getAllAdoptRequest", err);
         throw new Error("Failed to fetch AllAdoptRequest");
+    }
+}
+
+exports.getAdoptScore = async (id) => {
+    try {
+        const result = prisma.adopts.findFirst({
+            where: {
+                id: +id
+            }
+        })
+        return result;
+    } catch (err) {
+        console.log("err adoptScore", err);
+        throw new Error("Failed to AI determind score");
     }
 }
