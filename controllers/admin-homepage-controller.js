@@ -2,7 +2,7 @@ const prisma = require("../configs/prisma")
 const cloudinary = require("../configs/cloudinary")
 
 
-const adminPageController = {
+const adminHomePageController = {
   getHomeContent: async (req, res) => {
     try {
       const homeContent = await prisma.homeContent.findMany()
@@ -89,33 +89,7 @@ const adminPageController = {
     }
   },
 
-  deleteHomeContent: async (req, res) => {
-    try {
-      const { id } = req.params
-
-      const content = await prisma.homeContent.findUnique({
-        where: { id: parseInt(id) }
-      })
-
-      if (content) {
-        // Delete all three images from Cloudinary
-        for (const imageField of ['image1', 'image2', 'image3']) {
-          const publicId = content[imageField].split('/').slice(-1)[0].split('.')[0]
-          await cloudinary.uploader.destroy(`homepage/${publicId}`)
-        }
-
-        await prisma.homeContent.delete({
-          where: { id: parseInt(id) }
-        })
-
-        res.status(200).json({ message: "Content deleted successfully" })
-      } else {
-        res.status(404).json({ message: "Content not found" })
-      }
-    } catch (error) {
-      res.status(500).json({ message: error.message })
-    }
-  }
+   
 }
 
-module.exports = adminPageController
+module.exports = adminHomePageController
