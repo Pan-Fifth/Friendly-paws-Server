@@ -3,11 +3,17 @@ const prisma = require("../configs/prisma");
 
 exports.getChooseEventBydate = async (startDate, endDate) => {
     try {
-        const start = new Date(`${startDate}T00:00:00.000Z`);
-        const end = new Date(`${endDate}T23:59:59.999Z`);
+        const checkDate = new Date(startDate) - new Date(endDate)
+        let start;
+        let end;
+        if (checkDate < 0) {
+            start = new Date(`${startDate}T00:00:00.000Z`);
+            end = new Date(`${endDate}T23:59:59.999Z`);
+        } else {
+            start = new Date(`${endDate}T00:00:00.000Z`);
+            end = new Date(`${startDate}T23:59:59.999Z`);
+        }
 
-        console.log('Start Date (UTC):', start);
-        console.log('End Date (UTC):', end);
 
         const events = await prisma.events.findMany({
             where: {
@@ -74,12 +80,19 @@ exports.getAllEvent = async () => {
 
 
 exports.getChooseAdoptBydate = async (startDate, endDate) => {
-    try {
-        const start = new Date(`${startDate}T00:00:00.000Z`);
-        const end = new Date(`${endDate}T23:59:59.999Z`);
 
-        console.log('Start Date (UTC):', start);
-        console.log('End Date (UTC):', end);
+    try {
+        const checkDate = new Date(startDate) - new Date(endDate)
+        let start;
+        let end;
+        if (checkDate < 0) {
+            start = new Date(`${startDate}T00:00:00.000Z`);
+            end = new Date(`${endDate}T23:59:59.999Z`);
+        } else {
+            start = new Date(`${endDate}T00:00:00.000Z`);
+            end = new Date(`${startDate}T23:59:59.999Z`);
+        }
+
 
         const adopts = await prisma.adopts.findMany({
             where: {
@@ -177,11 +190,16 @@ exports.getAllAdopt = async () => {
 
 exports.getChooseDonateBydate = async (startDate, endDate) => {
     try {
-        const start = new Date(`${startDate}T00:00:00.000Z`);
-        const end = new Date(`${endDate}T23:59:59.999Z`);
-
-        console.log('Start Date (UTC):', start);
-        console.log('End Date (UTC):', end);
+        const checkDate = new Date(startDate) - new Date(endDate)
+        let start;
+        let end;
+        if (checkDate < 0) {
+            start = new Date(`${startDate}T00:00:00.000Z`);
+            end = new Date(`${endDate}T23:59:59.999Z`);
+        } else {
+            start = new Date(`${endDate}T00:00:00.000Z`);
+            end = new Date(`${startDate}T23:59:59.999Z`);
+        }
 
         const donation = await prisma.donates.findMany({
             where: {

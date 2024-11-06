@@ -292,16 +292,24 @@ model HomeContent {
 
 model AboutContent {
   id              Int    @id @default(autoincrement())
+  video_url       String
+  header_en       String @db.Text
+  header_th       String @db.Text
+  description_en  String @db.Text 
+  description_th  String @db.Text
+  help_title_en   String
+  help_title_th   String
+  help_content_en String @db.Text
+  help_content_th String @db.Text
   image           String
-  main_content_en String @db.LongText
-  main_content_th String @db.LongText
-  img_content_en  String
-  img_content_th  String
 }
+
 
 model EventBanner {
   id    Int    @id @default(autoincrement())
-  image String
+  image1 String 
+  image2 String?
+  image3 String?
 }
 
 model TableContact {
@@ -311,3 +319,4 @@ model TableContact {
   address String
   hours   String
 }
+
