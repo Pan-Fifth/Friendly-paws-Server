@@ -17,6 +17,12 @@ exports.eventShowPages = async (req, res) => {
 
         const today = new Date();
         const allEvent = await prisma.events.findMany({
+            where:{
+                OR: [
+                    { status: "ACTIVE" },
+                    { status: "PENDING" }
+                ]
+            },
             include: {
                 image: true,
             }
@@ -120,9 +126,33 @@ exports.regisEvent = async (req, res, next) => {
 
 exports.createEvent = async (req, res, next) => {
     try {
-        const { title, date_start, date_end, description, location, image } = req.body;
-        const userId = req.user
-        const event = await prisma.events.create({
+        const { title_en, title_th, date_start, date_end, description_en, description_th, location } = req.body;
+        console.log("req.body", req.body)
+
+        // ตรวจสอบสิทธิ์การเข้าถึง
+        if (req.user.role !== "ADMIN") {
+            return res.status(400).json({ message: "Unauthorized" });
+        }
+
+        // ตรวจสอบว่ามีไฟล์อัปโหลดมาหรือไม่
+        const hasFile = !!req.file;
+        let uploadResult = {};
+        console.log("hasFile", hasFile)
+
+        if (hasFile) {
+            // อัปโหลดไฟล์ไปที่ Cloudinary
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                overwrite: true,
+                public_id: path.parse(req.file.path).name,
+            });
+            // ลบไฟล์ออกจากเครื่องหลังอัปโหลดสำเร็จ
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error("Error removing file:", err);
+            })
+        }
+
+        // สร้างข้อมูล event ใหม่
+        const newEvent = await prisma.events.create({
             data: {
                 title_en,
                 title_th,
@@ -139,9 +169,87 @@ exports.createEvent = async (req, res, next) => {
                 image: true,
             },
         });
-        res.status(200).json({ message: "createEvent success", event });
+
+        res.status(200).json({
+            message: "Event created successfully",
+            event: newEvent,
+        });
+
+    } catch (err) {
+        console.error('Error creating event:', err);
+        next(err);
+    }
+};
+
+
+
+
+exports.deleteEvent = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        console.log("ขอดู ID", id)
+        const event = await prisma.events.findUnique({
+            where: {
+                id: +id,
+            },
+        });
+        console.log(event)
+        if (!event) {
+            return res.status(404).json({ message: "Event---- not found" });
+
+        }
+        // ตรวจสอบสิทธิ์การเข้าถึง
+        if (req.user.role !== "ADMIN") {
+            return res.status(400).json({ message: "Unauthorized" });
+        }
+        // ลบ event
+        await prisma.events.delete({
+            where: {
+                id: +id,
+            },
+        });
+        res.status(200).json({ message: "Event deleted successfully" });
     } catch (error) {
+        console.log(error)
         next(error);
     }
 }
 
+
+exports.updateEvent = async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const { title_en, title_th, description_en, description_th, date_start, date_end, location } = req.body;
+
+        const event = await prisma.events.findUnique({
+            where: {
+                id: +id
+            }
+        });
+        
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        const updatedEvent = await prisma.events.update({
+            where: {
+                id: +id
+            },
+            data: {
+                title_en,
+                title_th,
+                description_en,
+                description_th,
+                date_start: new Date(date_start),
+                date_end: new Date(date_end),
+                location,
+            }
+        });
+
+        res.status(200).json({ message: "Event updated successfully", data: updatedEvent });
+    } catch (error) {
+        console.error("Error updating event:", error);
+        res.status(500).json({ message: "An error occurred while updating the event" });
+        next(error);
+    }
+};
