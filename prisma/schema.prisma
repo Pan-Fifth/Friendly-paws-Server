@@ -45,7 +45,7 @@ enum Role {
 model HomeImages {
   id      Int    @id @default(autoincrement())
   url     String
-  adoptId Int    @map("user_id")
+  adoptId Int    @map("adopt_id")
   adopts  Adopts @relation(fields: [adoptId], references: [id], onDelete: Cascade)
 }
 

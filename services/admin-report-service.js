@@ -333,12 +333,6 @@ exports.getAllAdoptRequest = async (count, page) => {
                         lastname: true,
                         phone: true,
                         email: true,
-                        HomeImage:{
-                            select:{
-                                url:true
-                            }
-
-                        }
                     }
                 },
                 pet: {
@@ -350,6 +344,11 @@ exports.getAllAdoptRequest = async (count, page) => {
                                 url: true
                             }
                         }
+                    }
+                },
+                HomeImages:{
+                    select:{
+                        url:true
                     }
                 }
             }

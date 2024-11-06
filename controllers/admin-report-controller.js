@@ -124,6 +124,7 @@ exports.checkScore  = async(req,res,next)=>{
             return createError(402,"Unauthorized")
         }
         const adoptDetail = await getAdoptScore(id)
+        console.log(adoptDetail)
         const score = await aiCalScore(adoptDetail,lang)
         res.json(score)
     } catch (err) {

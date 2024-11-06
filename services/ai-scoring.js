@@ -39,7 +39,7 @@ exports.aiCalScore = async (formData,language) => {
         พิจารณาความเหมาะสมของบุคคลในการรับเลี้ยงสัตว์จากข้อมูลดังนี้:
         
         - อาชีพ: ${formData.career}
-        - เวลาทำงาน: ${formData.workTime} ชั่วโมง/วัน
+        - เวลาทำงานเวลา: ${formData.workTime} /วัน
         - วันหยุด: ${formData.dayOff} วัน/สัปดาห์
         - เงินเดือน: ${formData.salary} ต่อเดือน
         - วันเกิด: ${formData.dateOfBirth}
@@ -51,7 +51,7 @@ exports.aiCalScore = async (formData,language) => {
         - มีสวน: ${formData.hasGarden}
         - มีรั้ว: ${formData.hasFence}
         - สามารถพาสุนัขเดินเล่นได้หรือไม่: ${formData.canWalkDog}
-        - เหตุผลในการรับเลี้ยงสัตว์: ${formData.reasonToAdopt}
+        - เหตุผลในการรับเลี้ยงสัตว์: ${formData.why}
         
         โปรดให้คะแนนความเหมาะสมในการรับเลี้ยงสัตว์จาก 1-100 ตามปัจจัยต่างๆ เช่น ตารางเวลาทำงาน, สถานการณ์ครอบครัว, การอยู่อาศัย, สถานะทางการเงิน, และความสามารถในการดูแลสัตว์เลี้ยง
         
