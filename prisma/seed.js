@@ -98,6 +98,9 @@ async function main() {
             lastname: `LastName${i + 1}`,
             phone: `08${Math.floor(10000000 + Math.random() * 90000000)}`,
             role,
+            googleId: null,
+            resettoken: null,
+            resettokenExpire: null
           },
         });
       })
@@ -117,10 +120,12 @@ async function main() {
             color: ["Brown", "Black", "White", "Golden", "Grey"][Math.floor(Math.random() * 5)],
             gender: Math.random() > 0.5 ? "MALE" : "FEMALE",
             type: isDog ? "DOG" : "CAT",
+            status: ["AVAILABLE", "PENDING", "ADOPTED", "FOSTERED", "UNAVAILABLE"][Math.floor(Math.random() * 5)],
             breed_en: isDog ? "Golden Retriever" : "Persian",
             breed_th: isDog ? "โกลเด้น รีทรีฟเวอร์" : "เปอร์เซีย",
             description_en: `Lovely ${isDog ? "dog" : "cat"} looking for a forever home`,
             description_th: `${isDog ? "สุนัข" : "แมว"}น่ารักกำลังมองหาบ้าน`,
+            medical_history: "Healthy and vaccinated",
             is_vaccinated: Math.random() > 0.3,
             is_neutered: Math.random() > 0.3,
             weight: 10 + Math.random() * 20,
@@ -136,7 +141,7 @@ async function main() {
   );
 
   // Creating 12 adoption applications
-  const adoptions = await Promise.all(
+  const adopts = await Promise.all(
     Array(12)
       .fill()
       .map(async (_, i) => {
@@ -146,38 +151,32 @@ async function main() {
             petId: pets[Math.floor(Math.random() * pets.length)].id,
             status: ["PENDING", "ADOPTED", "FOSTERED"][Math.floor(Math.random() * 3)],
             address: `${i + 1} Bangkok Street, District ${i + 1}`,
-            career: ["Engineer", "Teacher", "Doctor", "Business Owner"][
-              Math.floor(Math.random() * 4)
-            ],
+            career: ["Engineer", "Teacher", "Doctor", "Business Owner"][Math.floor(Math.random() * 4)],
             workTime: "9:00-18:00",
             workPlace: `Company ${i + 1}`,
             dayOff: "Saturday-Sunday",
             salary: 30000 + Math.floor(Math.random() * 70000),
-            dateOfBirth: new Date(
-              1980 + Math.floor(Math.random() * 20),
-              Math.floor(Math.random() * 12),
-              1
-            ),
+            dateOfBirth: new Date(1980 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), 1),
             socialContact: `line: user${i + 1}`,
             currentPetCount: Math.floor(Math.random() * 3),
             currentPetDetails: "Previous experience with pets",
             familyMemberCount: 1 + Math.floor(Math.random() * 5),
             familyAlwaysHome: Math.random() > 0.5,
             aloneHours: Math.floor(Math.random() * 8),
-            housingType: [
-              "OWN_HOUSE",
-              "RENTAL_HOUSE",
-              "CONDO",
-              "APARTMENT",
-              "RENTAL_ROOM",
-              "SINGLE_HOUSE",
-            ][Math.floor(Math.random() * 6)],
+            housingType: ["OWN_HOUSE", "RENTAL_HOUSE", "CONDO", "APARTMENT", "RENTAL_ROOM", "SINGLE_HOUSE"][Math.floor(Math.random() * 6)],
             hasGarden: Math.random() > 0.5,
             hasFence: Math.random() > 0.5,
             canWalkDog: Math.random() > 0.2,
             deliveryType: Math.random() > 0.5 ? "PICK_UP" : "REQUIRE_DELIVERY",
+            approved_at: Math.random() > 0.5 ? new Date() : null,
+            approved_by: Math.random() > 0.5 ? users[0].id : null,
+            why: "Adoption reason here",
+            home_image_checked: Math.random() > 0.5,
             accommodationImages: {
-              create: [{ url: HOME_IMAGES[i % 10] }, { url: HOME_IMAGES[(i + 1) % 10] }],
+              create: [
+                { url: HOME_IMAGES[i % 10] },
+                { url: HOME_IMAGES[(i + 1) % 10] }
+              ],
             },
           },
         });
@@ -259,7 +258,7 @@ async function main() {
       .map(async (_, i) => {
         return prisma.homeImages.create({
           data: {
-            userId: users[Math.floor(Math.random() * users.length)].id,
+            adoptId: adopts[Math.floor(Math.random() * adopts.length)].id,
             url: HOME_IMAGES[i],
           },
         });

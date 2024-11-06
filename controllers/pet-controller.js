@@ -4,7 +4,7 @@ const createError = require('../utils/createError')
 const cloudinary = require('../configs/cloudinary')
 const path = require('path')
 const fs = require('fs/promises')
-const { aiCalScore } = require('../services/ai-scoring')
+
 
 
 exports.aPets = async (req, res, next) => {
@@ -674,18 +674,3 @@ exports.createAdoptRequest = async (req, res, next) => {
     }
 }
 
-exports.checkScore = async (req, res, next) => {
-    try {
-        const { id, lang } = req.params
-        const adoptDetail = await prisma.adopts.findFirst({
-            where: {
-                id: +id
-            }
-        })
-        const score = await aiCalScore(adoptDetail, lang)
-        console.log("this is score", score)
-        res.json(score)
-    } catch (err) {
-        next(err)
-    }
-}
