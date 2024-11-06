@@ -72,11 +72,6 @@ router.post('/contact-info', upload.single('image'), adminContactController.crea
 router.put('/contact-info/:id', uploadFields, adminContactController.updateContactInfo); // อัพเดทข้อมูล ContactInfo
 
 
-router.get('/', getDonationGoals)
-router.put('/:year', updateDonationGoals)
-
-router.get('/home-content', adminHomePageController.getHomeContent)
-router.put('/home-content/:id',uploadFields, adminHomePageController.updateHomeContent)
 
 router.get('/donation-content', donationPageController.getDonationContent)
 router.put('/donation-content/:id', uploadFields, donationPageController.updateDonationContent)
