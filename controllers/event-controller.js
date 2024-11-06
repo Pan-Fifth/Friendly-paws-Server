@@ -53,7 +53,10 @@ exports.eventShowPages = async (req, res) => {
                 date_start: {
                     gte: today,
                 },
-                status: "ACTIVE"
+                OR: [
+                    { status: "ACTIVE" },
+                    { status: "PENDING" }
+                ]
 
             },
             select: {
