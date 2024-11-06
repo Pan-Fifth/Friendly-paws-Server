@@ -311,6 +311,7 @@ exports.getAllAdoptRequest = async (count, page) => {
             take: +count,
             skip: ((+page) - 1) * count,
             select: {
+                id:true,
                 career: true,
                 address:true,
                 workTime: true,

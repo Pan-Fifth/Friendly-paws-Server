@@ -120,12 +120,13 @@ exports.allAdoptRequest = async (req,res,next)=>{
 exports.checkScore  = async(req,res,next)=>{
     try {
         const{id,lang}=req.params
+        console.log(id)
         if(req.user.role !== "ADMIN"){
             return createError(402,"Unauthorized")
         }
         const adoptDetail = await getAdoptScore(id)
-        console.log(adoptDetail)
         const score = await aiCalScore(adoptDetail,lang)
+        console.log(score)
         res.json(score)
     } catch (err) {
         next(err)
