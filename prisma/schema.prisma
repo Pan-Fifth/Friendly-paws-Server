@@ -147,7 +147,7 @@ model Adopts {
 
   // Relations
   user            Users        @relation("UserAdoptions", fields: [userId], references: [id])
-  pet             Pets         @relation("PetAdoptions", fields: [petId], references: [id])
+  pet             Pets         @relation("PetAdoptions", fields: [petId], references: [id], onDelete: Cascade)
   approvedByAdmin Users?       @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
   Users           Users?       @relation(fields: [usersId], references: [id])
   usersId         Int?

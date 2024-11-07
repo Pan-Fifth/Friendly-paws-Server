@@ -275,6 +275,26 @@ CREATE TABLE `DonationContent` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `ContactInfo` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `header_en` TEXT NOT NULL,
+    `header_th` TEXT NOT NULL,
+    `content_en` LONGTEXT NOT NULL,
+    `content_th` LONGTEXT NOT NULL,
+    `generalInfo_en` TEXT NOT NULL,
+    `generalInfo_th` TEXT NOT NULL,
+    `adoptions_en` TEXT NOT NULL,
+    `adoptions_th` TEXT NOT NULL,
+    `phone` TEXT NOT NULL,
+    `openingTimes_en` TEXT NOT NULL,
+    `openingTimes_th` TEXT NOT NULL,
+    `address_th` TEXT NOT NULL,
+    `address_en` TEXT NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `HomeImages` ADD CONSTRAINT `HomeImages_adopt_id_fkey` FOREIGN KEY (`adopt_id`) REFERENCES `Adopts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -288,7 +308,7 @@ ALTER TABLE `PetImages` ADD CONSTRAINT `PetImages_pet_id_fkey` FOREIGN KEY (`pet
 ALTER TABLE `Adopts` ADD CONSTRAINT `Adopts_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `Users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Adopts` ADD CONSTRAINT `Adopts_pet_id_fkey` FOREIGN KEY (`pet_id`) REFERENCES `Pets`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Adopts` ADD CONSTRAINT `Adopts_pet_id_fkey` FOREIGN KEY (`pet_id`) REFERENCES `Pets`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Adopts` ADD CONSTRAINT `Adopts_approved_by_fkey` FOREIGN KEY (`approved_by`) REFERENCES `Users`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
