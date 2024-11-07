@@ -288,6 +288,7 @@ model HomeContent {
   image1     String
   image2     String
   image3     String
+  image4     String?
   content_en String @db.LongText //header, subtitle, img1 title, img1 content, img2 title, img2 content, img3 title, img3 content
   content_th String @db.LongText
 }

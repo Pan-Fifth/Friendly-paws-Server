@@ -5,8 +5,10 @@ const upload = multer({ dest: 'uploads/' });
 const uploadFields = upload.fields([
   { name: 'image1', maxCount: 1 },
   { name: 'image2', maxCount: 1 },
-  { name: 'image3', maxCount: 1 }
+  { name: 'image3', maxCount: 1 },
+  { name: 'image4', maxCount: 1 }
 ]);
+
 
 const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/admin-controller");
 
@@ -21,6 +23,7 @@ const adminContactController = require('../controllers/admin-contact-controller'
 const donationPageController = require('../controllers/admin-donation-controller')
 const eventPageController = require('../controllers/admin-event-controller')
 const contactPageController = require('../controllers/admin-contact-controller')
+
 
 // รายงาน
 router.get('/report-event', reportEventByDate);
