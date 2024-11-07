@@ -72,7 +72,7 @@ router.put('/contact-info/:id', uploadFields, adminContactController.updateConta
 
 
 router.get('/donation-content', donationPageController.getDonationContent)
-router.put('/donation-content/:id', uploadFields, donationPageController.updateDonationContent)
+router.put('/donation-content/:id', donationPageController.updateDonationContent)
 
 router.get('/event-banner', eventPageController.getEventBanner)
 router.put('/event-banner/:id', uploadFields, eventPageController.updateEventBanner)
