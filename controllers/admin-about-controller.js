@@ -5,6 +5,7 @@ const adminAboutPageController = {
   // ฟังก์ชันดึงข้อมูล AboutContent
   getAboutContent: async (req, res) => {
     try {
+
       const aboutContent = await prisma.aboutContent.findMany(); // ใช้ Prisma ดึงข้อมูล
       res.status(200).json(aboutContent);
     } catch (error) {
@@ -15,8 +16,9 @@ const adminAboutPageController = {
   // ฟังก์ชันสร้างข้อมูลใหม่ใน AboutContent
   createAboutContent: async (req, res) => {
     try {
-      const { video_url, header_en, header_th, description_en, description_th, 
-              help_title_en, help_title_th, help_content_en, help_content_th } = req.body;
+
+      const { video_url, header_en, header_th, description_en, description_th,
+        help_title_en, help_title_th, help_content_en, help_content_th } = req.body;
       const files = req.files;
 
       // อัพโหลดภาพไปที่ Cloudinary
@@ -48,9 +50,10 @@ const adminAboutPageController = {
   // ฟังก์ชันอัพเดทข้อมูล AboutContent
   updateAboutContent: async (req, res) => {
     try {
+
       const { id } = req.params;
-      const { video_url, header_en, header_th, description_en, description_th, 
-              help_title_en, help_title_th, help_content_en, help_content_th } = req.body;
+      const { video_url, header_en, header_th, description_en, description_th,
+        help_title_en, help_title_th, help_content_en, help_content_th } = req.body;
       const files = req.files;
 
       let updateData = {};
