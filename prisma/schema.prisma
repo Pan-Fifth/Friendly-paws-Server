@@ -69,6 +69,7 @@ model Pets {
   weight          Float?
   created_at      DateTime @default(now()) @db.Timestamp(0)
   updated_at      DateTime @updatedAt @db.Timestamp(0)
+  deleted_at      DateTime?
 
   // Foreign keys and Relations
 
@@ -147,7 +148,7 @@ model Adopts {
 
   // Relations
   user            Users        @relation("UserAdoptions", fields: [userId], references: [id])
-  pet             Pets         @relation("PetAdoptions", fields: [petId], references: [id])
+  pet             Pets         @relation("PetAdoptions", fields: [petId], references: [id], onDelete: Cascade)
   approvedByAdmin Users?       @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
   Users           Users?       @relation(fields: [usersId], references: [id])
   usersId         Int?
@@ -213,6 +214,7 @@ model Events {
   location       String
   created_at     DateTime      @default(now()) @db.Timestamp(0)
   updated_at     DateTime      @updatedAt @db.Timestamp(0)
+  deleted_at     DateTime?
   image          EventImages[]
 
   // Relations
