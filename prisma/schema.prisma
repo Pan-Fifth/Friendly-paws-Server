@@ -69,6 +69,7 @@ model Pets {
   weight          Float?
   created_at      DateTime @default(now()) @db.Timestamp(0)
   updated_at      DateTime @updatedAt @db.Timestamp(0)
+  deleted_at      DateTime?
 
   // Foreign keys and Relations
 
@@ -147,7 +148,7 @@ model Adopts {
 
   // Relations
   user            Users        @relation("UserAdoptions", fields: [userId], references: [id])
-  pet             Pets         @relation("PetAdoptions", fields: [petId], references: [id])
+  pet             Pets         @relation("PetAdoptions", fields: [petId], references: [id], onDelete: Cascade)
   approvedByAdmin Users?       @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
   Users           Users?       @relation(fields: [usersId], references: [id])
   usersId         Int?
@@ -213,6 +214,7 @@ model Events {
   location       String
   created_at     DateTime      @default(now()) @db.Timestamp(0)
   updated_at     DateTime      @updatedAt @db.Timestamp(0)
+  deleted_at     DateTime?
   image          EventImages[]
 
   // Relations
@@ -345,3 +347,20 @@ model DonationContent {
 
 
 
+
+model ContactInfo {
+  id            Int      @id @default(autoincrement()) // เป็นรหัสที่ auto increment
+  header_en       String @db.Text
+  header_th       String @db.Text
+  content_en String @db.LongText 
+  content_th String @db.LongText
+  generalInfo_en   String   @db.Text // ข้อมูลทั่วไป
+  generalInfo_th   String   @db.Text // ข้อมูลทั่วไป
+  adoptions_en     String   @db.Text // ข้อมูลการรับสมัครสนับสนุนการรับสงสัยปัญหา
+  adoptions_th     String   @db.Text // ข้อมูลการรับสมัครสนับสนุนการรับสงสัยปัญหา
+  phone         String   @db.Text // เบอร์โทรศัพท์
+  openingTimes_en  String   @db.Text // เวลาเปิดบริการ
+  openingTimes_th  String   @db.Text // เวลาเปิดบริการ
+  address_th       String   @db.Text // ที่อยู่
+  address_en       String   @db.Text // ที่อยู่
+}
