@@ -58,7 +58,6 @@ router.put('/:year', updateDonationGoals);
 
 // จัดการข้อมูลหน้า Home
 router.get('/home-content', adminHomePageController.getHomeContent);
-router.post('/home-content', upload.single('image'), adminHomePageController.createHomeContent);
 router.put('/home-content/:id', uploadFields, adminHomePageController.updateHomeContent);
 
 // จัดการข้อมูล About Content
@@ -70,7 +69,6 @@ router.put('/about-content/:id', uploadFields, adminAboutPageController.updateAb
 router.get('/contact-info', adminContactController.getContactInfo);  // ดึงข้อมูล ContactInfo
 router.post('/contact-info', upload.single('image'), adminContactController.createContactInfo); // สร้างข้อมูลใหม่
 router.put('/contact-info/:id', uploadFields, adminContactController.updateContactInfo); // อัพเดทข้อมูล ContactInfo
-
 
 
 router.get('/donation-content', donationPageController.getDonationContent)
