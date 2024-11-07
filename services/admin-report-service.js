@@ -18,7 +18,15 @@ exports.getChooseEventBydate = async (startDate, endDate) => {
         const events = await prisma.events.findMany({
             where: {
                 date_start: { gte: start },
-                date_end: { lte: end }
+                date_end: { lte: end },
+                OR: [
+                    {
+                        status: 'ACTIVE'
+                    },
+                    {
+                        status: 'COMPLETED'
+                    }
+                ]
             },
             select: {
                 id: true,
@@ -31,14 +39,14 @@ exports.getChooseEventBydate = async (startDate, endDate) => {
                 created_at: true,
 
             },
-            orderBy: { date_start: 'asc' }
+            orderBy: { date_start: 'desc' }
         });
 
-        console.log("Events Found:", events);
+
         return events;
 
     } catch (error) {
-        console.error("Error querying events:", error);
+
         throw new Error("Failed to fetch events");
     }
 };
@@ -69,11 +77,41 @@ exports.getAllEvent = async () => {
             orderBy: { date_start: 'asc' }
         });
 
-        console.log("Events Found:", events);
+
         return events;
 
     } catch (error) {
-        console.error("Error querying events:", error);
+
+        throw new Error("Failed to fetch events");
+    }
+};
+exports.getListUserEventById = async (eventId) => {
+
+    try {
+
+        const event = await prisma.eventAttendees.findMany({
+            where: {
+                eventId: +eventId
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstname: true,
+                        lastname: true,
+                        phone: true,
+                    }
+                }
+            }
+
+
+        });
+
+        console.log("Events Found:", event);
+        return event;
+
+    } catch (error) {
+        console.log(error)
         throw new Error("Failed to fetch events");
     }
 };
@@ -312,7 +350,7 @@ exports.getAllAdoptRequest = async (count, page) => {
             skip: ((+page) - 1) * count,
             select: {
                 career: true,
-                address:true,
+                address: true,
                 workTime: true,
                 workPlace: true,
                 dayOff: true,
@@ -346,9 +384,9 @@ exports.getAllAdoptRequest = async (count, page) => {
                         }
                     }
                 },
-                HomeImages:{
-                    select:{
-                        url:true
+                HomeImages: {
+                    select: {
+                        url: true
                     }
                 }
             }

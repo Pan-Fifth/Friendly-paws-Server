@@ -10,7 +10,7 @@ const uploadFields = upload.fields([
 
 const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/admin-controller");
 
-const { reportEventByDate, reportAllEvent, reportAdoptByDate, reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList, allAdoptRequest, checkScore } = require('../controllers/admin-report-controller');
+const { reportEventByDate, reportAllEvent, reportListUserEvent, reportAdoptByDate, reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList, allAdoptRequest, checkScore } = require('../controllers/admin-report-controller');
 const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require('../controllers/admin-controller');
 const { createEvent, deleteEvent, updateEvent } = require("../controllers/event-controller");
 const uploadMulter = require("../middlewares/upload-Event");
@@ -25,6 +25,7 @@ const contactPageController = require('../controllers/admin-contact-controller')
 // รายงาน
 router.get('/report-event', reportEventByDate);
 router.get('/report-event-all', reportAllEvent);
+router.get('/report-list-user-event/:eventId', reportListUserEvent);
 router.get('/report-adopt', reportAdoptByDate);
 router.get('/report-adopt-all', reportAllAdopt);
 
