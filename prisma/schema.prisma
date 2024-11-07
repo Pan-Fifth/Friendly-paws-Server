@@ -28,7 +28,6 @@ model Users {
   role              Role             @default(USER)
   // Relations
   pets              Pets[]
-  HomeImage         HomeImages[]
   adoptions         Adopts[]         @relation("UserAdoptions")
   donations         Donates[]
   eventAttendees    EventAttendees[]
@@ -44,10 +43,10 @@ enum Role {
 }
 
 model HomeImages {
-  id     Int    @id @default(autoincrement())
-  url    String
-  userId Int    @map("user_id")
-  user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id      Int    @id @default(autoincrement())
+  url     String
+  adoptId Int    @map("adopt_id")
+  adopts  Adopts @relation(fields: [adoptId], references: [id], onDelete: Cascade)
 }
 
 model Pets {
@@ -70,6 +69,7 @@ model Pets {
   weight          Float?
   created_at      DateTime @default(now()) @db.Timestamp(0)
   updated_at      DateTime @updatedAt @db.Timestamp(0)
+  deleted_at      DateTime?
 
   // Foreign keys and Relations
 
@@ -142,16 +142,17 @@ model Adopts {
   // Approval Process
   approved_at        DateTime?
   approved_by        Int?
-  notes              String?   @db.Text
+  why                String?   @db.Text
   home_image_checked Boolean   @default(false)
   created_at         DateTime  @default(now()) @db.Timestamp(0)
 
   // Relations
-  user            Users  @relation("UserAdoptions", fields: [userId], references: [id])
-  pet             Pets   @relation("PetAdoptions", fields: [petId], references: [id])
-  approvedByAdmin Users? @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
-  Users           Users? @relation(fields: [usersId], references: [id])
+  user            Users        @relation("UserAdoptions", fields: [userId], references: [id])
+  pet             Pets         @relation("PetAdoptions", fields: [petId], references: [id], onDelete: Cascade)
+  approvedByAdmin Users?       @relation("ApprovedByAdmin", fields: [approved_by], references: [id])
+  Users           Users?       @relation(fields: [usersId], references: [id])
   usersId         Int?
+  HomeImages      HomeImages[]
 }
 
 enum HousingType {
@@ -213,6 +214,7 @@ model Events {
   location       String
   created_at     DateTime      @default(now()) @db.Timestamp(0)
   updated_at     DateTime      @updatedAt @db.Timestamp(0)
+  deleted_at     DateTime?
   image          EventImages[]
 
   // Relations
@@ -295,7 +297,7 @@ model AboutContent {
   video_url       String
   header_en       String @db.Text
   header_th       String @db.Text
-  description_en  String @db.Text 
+  description_en  String @db.Text
   description_th  String @db.Text
   help_title_en   String
   help_title_th   String
@@ -304,10 +306,9 @@ model AboutContent {
   image           String
 }
 
-
 model EventBanner {
-  id    Int    @id @default(autoincrement())
-  image1 String 
+  id     Int     @id @default(autoincrement())
+  image1 String
   image2 String?
   image3 String?
 }
@@ -320,3 +321,46 @@ model TableContact {
   hours   String
 }
 
+model DonationContent {
+  id                  Int    @id @default(autoincrement())
+  title_en            String
+  title_th            String
+  description_en      String @db.Text
+  description_th      String @db.Text
+  typing_en           String
+  typing_th           String
+  form_title_en       String
+  form_title_th       String
+  form_desc_en        String
+  form_desc_th        String
+  donation_options    Json   // Store the array of donation options with amounts, benefits and icons
+  custom_amount_en    String
+  custom_amount_th    String
+  impact_message_en   String @db.Text
+  impact_message_th   String @db.Text
+  donate_button_en    String
+  donate_button_th    String
+  close_button_en     String
+  close_button_th     String
+}
+ 
+
+
+
+
+model ContactInfo {
+  id            Int      @id @default(autoincrement()) // เป็นรหัสที่ auto increment
+  header_en       String @db.Text
+  header_th       String @db.Text
+  content_en String @db.LongText 
+  content_th String @db.LongText
+  generalInfo_en   String   @db.Text // ข้อมูลทั่วไป
+  generalInfo_th   String   @db.Text // ข้อมูลทั่วไป
+  adoptions_en     String   @db.Text // ข้อมูลการรับสมัครสนับสนุนการรับสงสัยปัญหา
+  adoptions_th     String   @db.Text // ข้อมูลการรับสมัครสนับสนุนการรับสงสัยปัญหา
+  phone         String   @db.Text // เบอร์โทรศัพท์
+  openingTimes_en  String   @db.Text // เวลาเปิดบริการ
+  openingTimes_th  String   @db.Text // เวลาเปิดบริการ
+  address_th       String   @db.Text // ที่อยู่
+  address_en       String   @db.Text // ที่อยู่
+}
