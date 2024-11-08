@@ -29,6 +29,17 @@ const CAT_IMAGES = [
   "https://images.unsplash.com/photo-1561948955-570b270e7c36",
 ];
 
+const MIXED_IMAGES = [
+  "https://i.pinimg.com/564x/ee/00/20/ee0020e9d7586708083aecdb77be6293.jpg",
+
+  "https://i.pinimg.com/564x/fa/98/82/fa988290ed5db0af24e733cdc5522158.jpg",
+
+  "https://i.pinimg.com/564x/a6/8a/ba/a68abadc337799911f4db1adb36a4cf1.jpg",
+
+  "https://i.pinimg.com/564x/fa/82/bc/fa82bc582fd33946eb7a6cbb3f915329.jpg",
+
+  "https://i.pinimg.com/564x/1b/23/b5/1b23b5e16b3f318e61fdc5af3ea4579e.jpg",
+];
 const HOME_IMAGES = [
   "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2",
   "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83",
@@ -58,14 +69,14 @@ const EVENT_IMAGES = [
 const BANNER_IMAGES = [
   "https://images.unsplash.com/photo-1548199973-03cce0bbc87b",
   "https://images.unsplash.com/photo-1593871075120-982e042088d8",
-  "https://images.unsplash.com/photo-1597633425046-08f5110420b5"
+  "https://images.unsplash.com/photo-1597633425046-08f5110420b5",
 ];
 
 async function main() {
   await prisma.$transaction([
-    prisma.tableContact.deleteMany(),
     prisma.eventBanner.deleteMany(),
     prisma.aboutContent.deleteMany(),
+    prisma.contactInfo.deleteMany(),
     prisma.homeContent.deleteMany(),
     prisma.donationGoals.deleteMany(),
     prisma.volunteerAvailabilities.deleteMany(),
@@ -100,7 +111,7 @@ async function main() {
             role,
             googleId: null,
             resettoken: null,
-            resettokenExpire: null
+            resettokenExpire: null,
           },
         });
       })
@@ -120,7 +131,9 @@ async function main() {
             color: ["Brown", "Black", "White", "Golden", "Grey"][Math.floor(Math.random() * 5)],
             gender: Math.random() > 0.5 ? "MALE" : "FEMALE",
             type: isDog ? "DOG" : "CAT",
-            status: ["AVAILABLE", "PENDING", "ADOPTED", "FOSTERED", "UNAVAILABLE"][Math.floor(Math.random() * 5)],
+            status: ["AVAILABLE", "PENDING", "ADOPTED", "FOSTERED", "UNAVAILABLE"][
+              Math.floor(Math.random() * 5)
+            ],
             breed_en: isDog ? "Golden Retriever" : "Persian",
             breed_th: isDog ? "โกลเด้น รีทรีฟเวอร์" : "เปอร์เซีย",
             description_en: `Lovely ${isDog ? "dog" : "cat"} looking for a forever home`,
@@ -151,19 +164,32 @@ async function main() {
             petId: pets[Math.floor(Math.random() * pets.length)].id,
             status: ["PENDING", "ADOPTED", "FOSTERED"][Math.floor(Math.random() * 3)],
             address: `${i + 1} Bangkok Street, District ${i + 1}`,
-            career: ["Engineer", "Teacher", "Doctor", "Business Owner"][Math.floor(Math.random() * 4)],
+            career: ["Engineer", "Teacher", "Doctor", "Business Owner"][
+              Math.floor(Math.random() * 4)
+            ],
             workTime: "9:00-18:00",
             workPlace: `Company ${i + 1}`,
             dayOff: "Saturday-Sunday",
             salary: 30000 + Math.floor(Math.random() * 70000),
-            dateOfBirth: new Date(1980 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), 1),
+            dateOfBirth: new Date(
+              1980 + Math.floor(Math.random() * 20),
+              Math.floor(Math.random() * 12),
+              1
+            ),
             socialContact: `line: user${i + 1}`,
             currentPetCount: Math.floor(Math.random() * 3),
             currentPetDetails: "Previous experience with pets",
             familyMemberCount: 1 + Math.floor(Math.random() * 5),
             familyAlwaysHome: Math.random() > 0.5,
             aloneHours: Math.floor(Math.random() * 8),
-            housingType: ["OWN_HOUSE", "RENTAL_HOUSE", "CONDO", "APARTMENT", "RENTAL_ROOM", "SINGLE_HOUSE"][Math.floor(Math.random() * 6)],
+            housingType: [
+              "OWN_HOUSE",
+              "RENTAL_HOUSE",
+              "CONDO",
+              "APARTMENT",
+              "RENTAL_ROOM",
+              "SINGLE_HOUSE",
+            ][Math.floor(Math.random() * 6)],
             hasGarden: Math.random() > 0.5,
             hasFence: Math.random() > 0.5,
             canWalkDog: Math.random() > 0.2,
@@ -173,10 +199,7 @@ async function main() {
             why: "Adoption reason here",
             home_image_checked: Math.random() > 0.5,
             accommodationImages: {
-              create: [
-                { url: HOME_IMAGES[i % 10] },
-                { url: HOME_IMAGES[(i + 1) % 10] }
-              ],
+              create: [{ url: HOME_IMAGES[i % 10] }, { url: HOME_IMAGES[(i + 1) % 10] }],
             },
           },
         });
@@ -278,25 +301,71 @@ async function main() {
   const homeContent = await prisma.homeContent.create({
     data: {
       image1: "/src/assets/dog.png",
-      image2:
-        "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
-      image3:
-        "https://res.cloudinary.com/petrescue/image/upload/b_auto:predominant,c_pad,f_auto,h_648,w_648/x9vv6s9se8byqdikbza0.jpg",
+      image2: DOG_IMAGES[0],
+      image3: DOG_IMAGES[1],
+      image4: DOG_IMAGES[2],
       content_en:
-        "WELCOME TO OUR CLUB!|Join our community of pet lovers and discover everything you need to know about pet care, health, and happiness.|Care Advice|Expert guidance for pet parents|Veterinary Help|Professional health support|Our Tips|Daily care best practices",
+        "ADOPT ME,| PLEASE|" + // Hero section
+        "FRIENDLY PAWS|" +
+        "WELCOME TO OUR CLUB!|" + // Welcome section
+        "Join our community of pet lovers and discover everything you need to know about pet care, health, and happiness.|" +
+        "CARE ADVICE|Expert tips for keeping your pets healthy and happy|" + // Features section
+        "VETERINARY HELP|Professional medical care when you need it most|" +
+        "OUR TIPS|Daily guidance for better pet parenting|" +
+        "Adoption Process|Learn about our simple and rewarding adoption process.|" + // Process section
+        "Make a Difference Today|Your donation helps us provide food, shelter, and medical care to animals in need. Every contribution, no matter how small, can change a life.|" + // Donation section
+        "VIEW MORE|DONATE NOW", // Action buttons
       content_th:
-        "ยินดีต้อนรับสู่ชมรมของเรา!|เข้าร่วมชุมชนคนรักสัตว์เลี้ยงและค้นพบทุกสิ่งที่คุณต้องรู้เกี่ยวกับการดูแล สุขภาพ และความสุขของสัตว์เลี้ยง|คำแนะนำการดูแล|คำแนะนำจากผู้เชี่ยวชาญสำหรับผู้เลี้ยงสัตว์|ความช่วยเหลือด้านสัตวแพทย์|การสนับสนุนด้านสุขภาพจากมืออาชีพ|เคล็ดลับของเรา|แนวทางปฏิบัติที่ดีที่สุดในการดูแลประจำวัน",
+        "โปรด รักฉัน| ดูแลฉันหน่อยนะ|" + // Hero section
+        "FRIENDLY PAWS|" +
+        "ยินดีต้อนรับสู่คลับของเรา!|" + // Welcome section
+        "เข้าร่วมชุมชนของคนรักสัตว์และค้นพบทุกสิ่งที่คุณต้องรู้เกี่ยวกับการดูแลสัตว์เลี้ยง สุขภาพ และความสุขของพวกเขา|" +
+        "คำแนะนำการดูแล|คำแนะนำจากผู้เชี่ยวชาญเพื่อให้สัตว์เลี้ยงของคุณมีสุขภาพดีและมีความสุข|" + // Features section
+        "ความช่วยเหลือจากสัตวแพทย์|การดูแลทางการแพทย์เมื่อคุณต้องการมากที่สุด|" +
+        "เคล็ดลับของเรา|คำแนะนำประจำวันสำหรับการเลี้ยงสัตว์ที่ดียิ่งขึ้น|" +
+        "กระบวนการรับเลี้ยง|เรียนรู้เกี่ยวกับกระบวนการรับเลี้ยงที่ง่ายและให้ผลตอบแทนของเรา|" + // Process section
+        "สร้างความเปลี่ยนแปลงวันนี้|การบริจาคของคุณช่วยให้เราจัดหาอาหาร ที่พัก และการดูแลทางการแพทย์ให้กับสัตว์ที่ต้องการความช่วยเหลือ ทุกการสนับสนุน ไม่ว่าจะเล็กหรือใหญ่ สามารถเปลี่ยนชีวิตได้|" + // Donation section
+        "ดูเพิ่มเติม|บริจาคเลย", // Action buttons
     },
   });
 
+  const aboutContent = await prisma.aboutContent.create({
+    data: {
+      // Header content
+      header_en: "... is a charitable organization ... 🐶",
+      header_th: "... คือองค์กรการกุศล ... 🐶",
+      
+      description_en: "Since its founding in 2008, Big Dog Ranch Rescue has saved over 70,000 dogs! Our mission is to save 10,000 dogs per year, rehabilitate and find them warm homes, and educate people about proper dog care and the importance of spaying and neutering.",
+      description_th: "นับตั้งแต่ก่อตั้งขึ้นในปี 2008 Big Dog Ranch Rescue ได้ช่วยชีวิตสุนัขกว่า 70,000 ตัว! ภารกิจของเราคือการช่วยชีวิตสุนัขให้ได้ 10,000 ตัวต่อปี รักษาและหาบ้านที่อบอุ่นให้กับพวกเขา รวมถึงให้ความรู้แก่ผู้คนเกี่ยวกับการดูแลสุนัขอย่างถูกต้องและความสำคัญของการทำหมันสุนัข",
+  
+      // Help section content
+      help_title_en: "How You Can Help:",
+      help_title_th: "คุณสามารถช่วยได้อย่างไร:",
+  
+      help_content_en: "We rely on donations and support to help sick, abandoned, and abused dogs in our care. Every dog we rescue receives treatment, vaccinations, and spaying. We also rehabilitate, socialize, and work to find new homes for our dogs. But we can't do it alone.",
+      help_content_th: "เราพึ่งพาการบริจาคและการสนับสนุนเพื่อช่วยเหลือสุนัขที่ป่วย ถูกทอดทิ้ง และถูกทารุณกรรมในความดูแลของเรา สุนัขทุกตัวที่เราช่วยเหลือได้รับการรักษา ฉีดวัคซีน และทำหมันแล้ว เรายังฟื้นฟู ฝึกสังคม และพยายามหาบ้านใหม่ให้กับสุนัขของเรา แต่เราทำคนเดียวไม่ได้",
+  
+      // Additional content that can be split using the '|' delimiter
+      content_en: "Mission Statement|Vision|Values|Our Impact",
+      content_th: "พันธกิจ|วิสัยทัศน์|ค่านิยม|ผลกระทบของเรา",
+
+      video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      image: "/src/assets/dog.png",
+    }
+  });
+  
   const donationContent = await prisma.donationContent.create({
     data: {
       title_en: "Make a Difference Today",
       title_th: "ร่วมสร้างความเปลี่ยนแปลงวันนี้",
-      description_en: "Join us in making a difference in the lives of animals in need. Your support helps provide food, shelter, and medical care.",
-      description_th: "ร่วมเป็นส่วนหนึ่งในการช่วยเหลือสัตว์ที่ต้องการความช่วยเหลือ การสนับสนุนของคุณช่วยจัดหาที่พัก อาหาร และการรักษาพยาบาล",
-      typing_en:  "Your compassion could be a game changer|Every donation makes a difference|Help us give them a better life.",
-      typing_th:  "ความเมตตาของคุณสามารถเปลี่ยนชีวิตได้|การบริจาคทุกครั้งมีความหมาย|ช่วยเรามอบชีวิตใหม่ให้พวกเขา",
+      description_en:
+        "Join us in making a difference in the lives of animals in need. Your support helps provide food, shelter, and medical care.",
+      description_th:
+        "ร่วมเป็นส่วนหนึ่งในการช่วยเหลือสัตว์ที่ต้องการความช่วยเหลือ การสนับสนุนของคุณช่วยจัดหาที่พัก อาหาร และการรักษาพยาบาล",
+      typing_en:
+        "Your compassion could be a game changer|Every donation makes a difference|Help us give them a better life.",
+      typing_th:
+        "ความเมตตาของคุณสามารถเปลี่ยนชีวิตได้|การบริจาคทุกครั้งมีความหมาย|ช่วยเรามอบชีวิตใหม่ให้พวกเขา",
       form_title_en: "Make a Donation",
       form_title_th: "บริจาค",
       form_desc_en: "Support our furry friends in need",
@@ -325,15 +394,44 @@ async function main() {
       donate_button_en: "Donate",
       donate_button_th: "บริจาค",
       close_button_en: "Close",
-      close_button_th: "ปิด"
+      close_button_th: "ปิด",
     },
   });
-  
+
   const eventBanner = await prisma.eventBanner.create({
     data: {
       image1: BANNER_IMAGES[0],
       image2: BANNER_IMAGES[1],
-      image3: BANNER_IMAGES[2]
+      image3: BANNER_IMAGES[2],
+    },
+  });
+
+  const contactInfo = await prisma.contactInfo.create({
+    data: {
+      // Header and main content
+      header_en: "Get in Touch with Friendly Paws",
+      header_th: "ติดต่อ Friendly Paws",
+      
+      content_en: "We're here to help and answer any questions you might have|Feel free to reach out to us anytime|Your feedback helps us improve our services",
+      content_th: "เราพร้อมช่วยเหลือและตอบคำถามทุกข้อสงสัย|สามารถติดต่อเราได้ตลอดเวลา|ความคิดเห็นของคุณช่วยให้เราพัฒนาบริการให้ดียิ่งขึ้น",
+  
+      // Contact details
+      generalInfo_en: "Animal Shelter and Adoption Center",
+      generalInfo_th: "ศูนย์พักพิงและรับเลี้ยงสัตว์",
+  
+      email: "contact@friendlypaws.org",
+      phone: "+66 2 123 4567",
+  
+      openingTimes_en: "Monday - Sunday: 9:00 AM - 6:00 PM",
+      openingTimes_th: "จันทร์ - อาทิตย์: 9:00 น. - 18:00 น.",
+  
+      address_en: "123 Pet Street, Animal District, Bangkok 10XXX",
+      address_th: "123 ถนนเพ็ท เขตแอนิมอล กรุงเทพฯ 10XXX",
+  
+      // Map coordinates
+      
+      latitude: "13.7583265",
+      longitude: "100.5349709"
     }
   });
   
