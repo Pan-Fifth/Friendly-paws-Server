@@ -22,23 +22,18 @@ const adminHomePageController = {
 
       // Handle image uploads if provided
       if (files) {
-        if (files.image1) {
-          const image1Result = await cloudinary.uploader.upload(files.image1[0].path, {
-            folder: "homepage"
-          })
-          updateData.image1 = image1Result.secure_url
-        }
-        if (files.image2) {
-          const image2Result = await cloudinary.uploader.upload(files.image2[0].path, {
-            folder: "homepage"
-          })
-          updateData.image2 = image2Result.secure_url
-        }
-        if (files.image3) {
-          const image3Result = await cloudinary.uploader.upload(files.image3[0].path, {
-            folder: "homepage"
-          })
-          updateData.image3 = image3Result.secure_url
+        for (let i = 1; i <= 4; i++) {
+          const imageKey = `image${i}`
+          if (files[imageKey]) {
+            const imageResult = await cloudinary.uploader.upload(files[imageKey][0].path, {
+              folder: "homepage",
+              transformation: [
+                { width: 1920, height: 1080, crop: "fill" },
+                { quality: "auto" }
+              ]
+            })
+            updateData[imageKey] = imageResult.secure_url
+          }
         }
       }
 
@@ -46,16 +41,37 @@ const adminHomePageController = {
       if (content_en) updateData.content_en = content_en
       if (content_th) updateData.content_th = content_th
 
+      // Validate content format
+      if (content_en && !content_en.includes('|') || content_th && !content_th.includes('|')) {
+        return res.status(400).json({ message: "Content must contain section separators (|)" })
+      }
+
       const updatedContent = await prisma.homeContent.update({
         where: { id: parseInt(id) },
-        data: updateData
+        data: updateData,
+        select: {
+          id: true,
+          image1: true,
+          image2: true,
+          image3: true,
+          image4: true,
+          content_en: true,
+          content_th: true
+        }
       })
 
-      res.status(200).json(updatedContent)
+      res.status(200).json({
+        message: "Home content updated successfully",
+        data: updatedContent
+      })
     } catch (error) {
-      res.status(500).json({ message: error.message })
+      res.status(500).json({ 
+        message: "Failed to update home content",
+        error: error.message 
+      })
     }
-  },
+}
+
 
    
 }

@@ -90,7 +90,7 @@ const adoptValidationSchema = Joi.object({
       deliveryType: Joi.string().valid('REQUIRE_DELIVERY', 'PICK_UP').required(),
     
       // Optional fields
-      notes: Joi.string().allow(null),
+      why: Joi.string().allow(null),
 
       files: Joi.string() 
     });
