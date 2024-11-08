@@ -1,5 +1,5 @@
 const { getDonations, exportDonationToExcel, getAdopts, exportAdoptToExcel,
-    getEvents, exportEventToExcel, getPets, exportPetToExcel } = require('../services/export-service');
+    getEvents, getListEvents, exportEventListToExcel, exportEventToExcel, getPets, exportPetToExcel } = require('../services/export-service');
 
 
 exports.downloadDonationReport = async (req, res, next) => {
@@ -24,9 +24,19 @@ exports.downloadAdoptReport = async (req, res, next) => {
 };
 exports.downloadEventReport = async (req, res, next) => {
     try {
-        const events = req.body.pets && req.body.events.length > 0 ? req.body.events : await getEvents();
+        const events = req.body.events && req.body.events.length > 0 ? req.body.events : await getEvents();
         console.log("Data passed to exportToExcel:", events); // ตรวจสอบข้อมูลอีกครั้งก่อน export
         await exportEventToExcel(events, res);
+    } catch (error) {
+        console.error("Error in downloadEventReport:", error);
+        res.status(500).json({ message: "Failed to export report" });
+    }
+};
+exports.downloadEventListReport = async (req, res, next) => {
+    try {
+        const events = req.body.events && req.body.events.length > 0 ? req.body.events : await getListEvents();
+        console.log("Data passed to exportToExcel:", events); // ตรวจสอบข้อมูลอีกครั้งก่อน export
+        await exportEventListToExcel(events, res);
     } catch (error) {
         console.error("Error in downloadEventReport:", error);
         res.status(500).json({ message: "Failed to export report" });

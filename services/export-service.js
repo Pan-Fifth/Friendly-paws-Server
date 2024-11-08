@@ -1,5 +1,7 @@
 const prisma = require('../configs/prisma');
 const ExcelJS = require('exceljs');
+const createError = require("../utils/createError")
+
 
 exports.getDonations = async () => {
     try {
@@ -28,8 +30,8 @@ exports.getDonations = async () => {
             status: donation.status || 'N/A'
         }));
     } catch (error) {
-        console.error("Error fetching donations:", error);
-        throw new Error("Failed to fetch donations");
+
+        return createError(500, error.message);
     }
 };
 
@@ -38,27 +40,24 @@ exports.exportDonationToExcel = async (donations, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Donations Report');
 
-    // กำหนดคอลัมน์ให้ตรงกับข้อมูลที่มี
+
     worksheet.columns = [
-        { header: 'Date', key: 'date', width: 15 },
-        { header: 'Donor Name', key: 'donorName', width: 25 },
-        { header: 'Amount', key: 'amount', width: 15 },
-        { header: 'Payment Method', key: 'paymentMethod', width: 20 },
-        { header: 'Transaction ID', key: 'transactionId', width: 25 },
-        { header: 'Status', key: 'status', width: 15 }
+        { header: 'วันที่ส่งข้อมูล', key: 'date', width: 15 },
+        { header: 'ชื่อผู้ระดมทุน', key: 'donorName', width: 25 },
+        { header: 'ยอดระดมทุน', key: 'amount', width: 15 },
+        { header: 'รหัสการทำธุรกรรม', key: 'transactionId', width: 25 },
+        { header: 'สถานะ', key: 'status', width: 15 }
     ];
 
-    // ดึงข้อมูลจาก donations และแมปข้อมูลในแต่ละฟิลด์ให้ตรงกัน
     donations.forEach(donation => {
         const row = {
             date: donation.created_at,
-            donorName: donation.user.firstname, // ใช้ชื่อจาก donation.user.firstname
+            donorName: donation.user.firstname,
             amount: donation.total,
-            paymentMethod: donation.payment_method,
             transactionId: donation.transaction_id,
             status: donation.status
         };
-        console.log("Adding row to worksheet:", row); // ตรวจสอบ row ก่อนเพิ่มลง Excel
+
         worksheet.addRow(row);
     });
 
@@ -94,7 +93,7 @@ exports.getAdopts = async () => {
                 socialContact: true,
                 approved_at: true,
                 approved_by: true,
-                notes: true,
+                why: true,
             },
             orderBy: { created_at: 'asc' }
         });
@@ -108,12 +107,11 @@ exports.getAdopts = async () => {
             contact: adopt.socialContact || 'N/A',
             approved_at: adopt.approved_at || 'N/A',
             approved_by: adopt.approvedByAdmin?.firstname || 'N/A',
-            notes: adopt.notes || 'N/A',
+            why: adopt.why || 'N/A',
 
         }));
     } catch (error) {
-        console.error("Error fetching donations:", error);
-        throw new Error("Failed to fetch donations");
+        return createError(500, error.message);
     }
 };
 
@@ -124,18 +122,18 @@ exports.exportAdoptToExcel = async (adopts, res) => {
 
     // กำหนดคอลัมน์ให้ตรงกับข้อมูลที่มี
     worksheet.columns = [
-        { header: 'Date', key: 'date', width: 15 },
-        { header: 'Adopter', key: 'adopter', width: 15 },
-        { header: 'Petname', key: 'petname', width: 15 },
-        { header: 'Status', key: 'status', width: 20 },
-        { header: 'Phone number', key: 'phonenumber', width: 20 },
-        { header: 'Contact', key: 'contact', width: 30 },
-        { header: 'Approved_at', key: 'approved_at', width: 15 },
-        { header: 'Approved_by', key: 'approved_by', width: 15 },
-        { header: 'Notes', key: 'notes', width: 50 }
+        { header: 'วันที่สร้าง', key: 'date', width: 15 },
+        { header: 'ชื่อผู้รับเลี้ยง', key: 'adopter', width: 15 },
+        { header: 'ชื่อสัตว์เลี้ยง', key: 'petname', width: 15 },
+        { header: 'สถานะ', key: 'status', width: 20 },
+        { header: 'เบอร์ติดต่อ', key: 'phonenumber', width: 20 },
+        { header: 'ช่องทางติดต่ออื่นๆ', key: 'contact', width: 30 },
+        { header: 'อนุมัติวันที่', key: 'approved_at', width: 15 },
+        { header: 'อนุมัติโดย', key: 'approved_by', width: 15 },
+        { header: 'รายละเอียดเพิ่มเติม', key: 'why', width: 50 }
     ];
 
-    // ดึงข้อมูลจาก donations และแมปข้อมูลในแต่ละฟิลด์ให้ตรงกัน
+
     adopts.forEach(adopt => {
         const row = {
             date: adopt.created_at,
@@ -146,9 +144,9 @@ exports.exportAdoptToExcel = async (adopts, res) => {
             contact: adopt.socialContact,
             approved_at: adopt.approved_at,
             approved_by: adopt.approvedByAdmin?.firstname,
-            notes: adopt.notes,
+            why: adopt.why,
         };
-        console.log("Adding row to worksheet:", row); // ตรวจสอบ row ก่อนเพิ่มลง Excel
+
         worksheet.addRow(row);
     });
 
@@ -187,13 +185,12 @@ exports.getEvents = async () => {
             date_end: event.date_end || 'N/A',
             location: event.location || 'N/A',
             status: event.status || 'N/A',
-            created_at: event.created_at || 'N/A',
+
 
 
         }));
     } catch (error) {
-        console.error("Error fetching events:", error);
-        throw new Error("Failed to fetch events");
+        return createError(500, error.message);
     }
 };
 
@@ -204,14 +201,14 @@ exports.exportEventToExcel = async (events, res) => {
 
     // กำหนดคอลัมน์ให้ตรงกับข้อมูลที่มี
     worksheet.columns = [
-        { header: 'Date', key: 'date', width: 15 },
-        { header: 'Title', key: 'title', width: 15 },
-        { header: 'Description', key: 'description', width: 15 },
-        { header: 'Date_start', key: 'date_start', width: 20 },
-        { header: 'Date_end', key: 'date_end', width: 20 },
-        { header: 'Location', key: 'location', width: 30 },
-        { header: 'Status', key: 'status', width: 15 },
-        { header: 'Approved_by', key: 'created_at', width: 15 },
+        { header: 'วันที่สร้าง', key: 'date', width: 15 },
+        { header: 'ชื่อกิจกรรม', key: 'title', width: 15 },
+        { header: 'รายละเอียด', key: 'description', width: 15 },
+        { header: 'วันที่เริ่มงาน', key: 'date_start', width: 20 },
+        { header: 'วัวันที่จบงาน', key: 'date_end', width: 20 },
+        { header: 'สถานที่จัดงาน', key: 'location', width: 30 },
+        { header: 'สถานะ', key: 'status', width: 15 },
+
 
     ];
 
@@ -225,9 +222,9 @@ exports.exportEventToExcel = async (events, res) => {
             date_end: event.date_end,
             location: event.location,
             status: event.status,
-            created_at: event.created_at,
+
         };
-        console.log("Adding row to worksheet:", row); // ตรวจสอบ row ก่อนเพิ่มลง Excel
+
         worksheet.addRow(row);
     });
 
@@ -237,6 +234,70 @@ exports.exportEventToExcel = async (events, res) => {
     await workbook.xlsx.write(res);
     res.end();
 };
+exports.getListEvents = async () => {
+    try {
+        const events = await prisma.eventAttendees.findMany({
+            where: {
+                eventId: +eventId
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstname: true,
+                        lastname: true,
+                        phone: true,
+                    }
+                }
+            }
+        });
+
+        return events.map(event => ({
+            id: event.user.id || 'N/A',
+            firstname: event.user.firstname || 'N/A',
+            lastname: event.user.lastname || 'N/A',
+            phone: event.user.phone || 'N/A',
+
+
+        }));
+    } catch (error) {
+
+        return createError(500, error.message);
+    }
+};
+exports.exportEventListToExcel = async (events, res) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Event Report');
+
+    // กำหนดคอลัมน์ให้ตรงกับข้อมูลที่มี
+    worksheet.columns = [
+        { header: 'ไอดี', key: 'id', width: 15 },
+        { header: 'ชื่อ', key: 'firstname', width: 30 },
+        { header: 'นามสกุล', key: 'lastname', width: 30 },
+        { header: 'เบอร์ติดต่อ', key: 'phone', width: 15 },
+
+    ];
+
+    // ดึงข้อมูลจาก donations และแมปข้อมูลในแต่ละฟิลด์ให้ตรงกัน
+    events.forEach(event => {
+        const row = {
+            id: event.user.id,
+            firstname: event.user.firstname,
+            lastname: event.user.lastname,
+            phone: event.user.phone
+
+        };
+
+        worksheet.addRow(row);
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=donations-report.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
+};
+
 
 exports.getPets = async () => {
     try {
@@ -279,8 +340,7 @@ exports.getPets = async () => {
 
         }));
     } catch (error) {
-        console.error("Error fetching pets:", error);
-        throw new Error("Failed to fetch pets");
+        return createError(500, error.message);
     }
 };
 
@@ -291,20 +351,19 @@ exports.exportPetToExcel = async (pets, res) => {
 
     // กำหนดคอลัมน์ให้ตรงกับข้อมูลที่มี
     worksheet.columns = [
-        { header: 'Date', key: 'date', width: 15 },
-        { header: 'PetName', key: 'petname', width: 15 },
-        { header: 'Age', key: 'age', width: 15 },
-        { header: 'Color', key: 'color', width: 20 },
-        { header: 'Gender', key: 'gender', width: 20 },
-        { header: 'Type', key: 'type', width: 30 },
-        { header: 'Status', key: 'status', width: 15 },
-        { header: 'Breed', key: 'breed', width: 15 },
-        { header: 'Description', key: 'description', width: 15 },
-        { header: 'MedicalHistory', key: 'medical_history', width: 15 },
-        { header: 'IsVaccinated', key: 'is_vaccinated', width: 15 },
-        { header: 'IsNeutered', key: 'is_neutered', width: 15 },
-        { header: 'Weight', key: 'weight', width: 15 },
-        { header: 'Created_at', key: 'created_at', width: 15 },
+        { header: 'วันที่เพิ่มข้อมูล', key: 'date', width: 15 },
+        { header: 'ชื่อน้อง', key: 'petname', width: 15 },
+        { header: 'วันเกิด', key: 'age', width: 15 },
+        { header: 'สี', key: 'color', width: 20 },
+        { header: 'เพศ', key: 'gender', width: 20 },
+        { header: 'ประเภท', key: 'type', width: 30 },
+        { header: 'สถานะ', key: 'status', width: 15 },
+        { header: 'สายพันธ์ุ', key: 'breed', width: 15 },
+        { header: 'รายละเอียด', key: 'description', width: 15 },
+        { header: 'ประวัติการรักษา', key: 'medical_history', width: 15 },
+        { header: 'วัคซีน', key: 'is_vaccinated', width: 15 },
+        { header: 'ทำหมัน', key: 'is_neutered', width: 15 },
+        { header: 'น้ำหนัก', key: 'weight', width: 15 },
 
     ];
 
@@ -324,9 +383,9 @@ exports.exportPetToExcel = async (pets, res) => {
             is_vaccinated: pet.is_vaccinated,
             is_neutered: pet.is_neutered,
             weight: pet.weight,
-            created_at: pet.created_at,
+
         };
-        console.log("Adding row to worksheet:", row); // ตรวจสอบ row ก่อนเพิ่มลง Excel
+
         worksheet.addRow(row);
     });
 
