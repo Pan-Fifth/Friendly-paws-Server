@@ -62,12 +62,10 @@ router.put('/home-content/:id', uploadFields, adminHomePageController.updateHome
 
 // จัดการข้อมูล About Content
 router.get('/about-content', adminAboutPageController.getAboutContent);
-router.post('/about-content', upload.single('image'), adminAboutPageController.createAboutContent);
 router.put('/about-content/:id', uploadFields, adminAboutPageController.updateAboutContent);
 
 // จัดการข้อมูล ContactInfo
 router.get('/contact-info', adminContactController.getContactInfo);  // ดึงข้อมูล ContactInfo
-router.post('/contact-info', upload.single('image'), adminContactController.createContactInfo); // สร้างข้อมูลใหม่
 router.put('/contact-info/:id', uploadFields, adminContactController.updateContactInfo); // อัพเดทข้อมูล ContactInfo
 
 

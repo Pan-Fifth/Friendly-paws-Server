@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model Users {
@@ -51,24 +52,24 @@ model HomeImages {
 
 model Pets {
   //both th and en inputs are required for name, description, and breed
-  id              Int      @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   name_en         String
   name_th         String
   age             DateTime
   color           String
   gender          Gender
   type            PetType
-  status          Status   @default(AVAILABLE)
+  status          Status    @default(AVAILABLE)
   breed_en        String?
   breed_th        String?
-  description_en  String?  @db.Text
-  description_th  String?  @db.Text
-  medical_history String?  @db.Text
-  is_vaccinated   Boolean  @default(false)
-  is_neutered     Boolean  @default(false)
+  description_en  String?   @db.Text
+  description_th  String?   @db.Text
+  medical_history String?   @db.Text
+  is_vaccinated   Boolean   @default(false)
+  is_neutered     Boolean   @default(false)
   weight          Float?
-  created_at      DateTime @default(now()) @db.Timestamp(0)
-  updated_at      DateTime @updatedAt @db.Timestamp(0)
+  created_at      DateTime  @default(now()) @db.Timestamp(0)
+  updated_at      DateTime  @updatedAt @db.Timestamp(0)
   deleted_at      DateTime?
 
   // Foreign keys and Relations
@@ -295,6 +296,7 @@ model HomeContent {
 model AboutContent {
   id              Int    @id @default(autoincrement())
   video_url       String
+  image           String
   header_en       String @db.Text
   header_th       String @db.Text
   description_en  String @db.Text
@@ -303,7 +305,8 @@ model AboutContent {
   help_title_th   String
   help_content_en String @db.Text
   help_content_th String @db.Text
-  image           String
+  content_en      String @db.Text
+  content_th      String @db.Text
 }
 
 model EventBanner {
@@ -313,54 +316,44 @@ model EventBanner {
   image3 String?
 }
 
-model TableContact {
-  id      Int    @id @default(autoincrement())
-  email   String
-  phone   String
-  address String
-  hours   String
-}
 
 model DonationContent {
-  id                  Int    @id @default(autoincrement())
-  title_en            String
-  title_th            String
-  description_en      String @db.Text
-  description_th      String @db.Text
-  typing_en           String
-  typing_th           String
-  form_title_en       String
-  form_title_th       String
-  form_desc_en        String
-  form_desc_th        String
-  donation_options    Json   // Store the array of donation options with amounts, benefits and icons
-  custom_amount_en    String
-  custom_amount_th    String
-  impact_message_en   String @db.Text
-  impact_message_th   String @db.Text
-  donate_button_en    String
-  donate_button_th    String
-  close_button_en     String
-  close_button_th     String
+  id                Int    @id @default(autoincrement())
+  title_en          String
+  title_th          String
+  description_en    String @db.Text
+  description_th    String @db.Text
+  typing_en         String
+  typing_th         String
+  form_title_en     String
+  form_title_th     String
+  form_desc_en      String
+  form_desc_th      String
+  donation_options  Json // Store the array of donation options with amounts, benefits and icons
+  custom_amount_en  String
+  custom_amount_th  String
+  impact_message_en String @db.Text
+  impact_message_th String @db.Text
+  donate_button_en  String
+  donate_button_th  String
+  close_button_en   String
+  close_button_th   String
 }
- 
-
-
-
 
 model ContactInfo {
-  id            Int      @id @default(autoincrement()) // เป็นรหัสที่ auto increment
+  id              Int    @id @default(autoincrement()) // เป็นรหัสที่ auto increment
   header_en       String @db.Text
   header_th       String @db.Text
-  content_en String @db.LongText 
-  content_th String @db.LongText
-  generalInfo_en   String   @db.Text // ข้อมูลทั่วไป
-  generalInfo_th   String   @db.Text // ข้อมูลทั่วไป
-  adoptions_en     String   @db.Text // ข้อมูลการรับสมัครสนับสนุนการรับสงสัยปัญหา
-  adoptions_th     String   @db.Text // ข้อมูลการรับสมัครสนับสนุนการรับสงสัยปัญหา
-  phone         String   @db.Text // เบอร์โทรศัพท์
-  openingTimes_en  String   @db.Text // เวลาเปิดบริการ
-  openingTimes_th  String   @db.Text // เวลาเปิดบริการ
-  address_th       String   @db.Text // ที่อยู่
-  address_en       String   @db.Text // ที่อยู่
+  content_en      String @db.LongText
+  content_th      String @db.LongText
+  generalInfo_en  String @db.Text // ข้อมูลทั่วไป
+  generalInfo_th  String @db.Text // ข้อมูลทั่วไป
+  email           String @db.Text // อีเมล์
+  phone           String @db.Text // เบอร์โทรศัพท์
+  openingTimes_en String @db.Text // เวลาเปิดบริการ
+  openingTimes_th String @db.Text // เวลาเปิดบริการ
+  address_th      String @db.Text // ที่อยู่
+  address_en      String @db.Text // ที่อยู่
+  latitude        String
+  longitude       String
 }

@@ -63,9 +63,9 @@ const BANNER_IMAGES = [
 
 async function main() {
   await prisma.$transaction([
-    prisma.tableContact.deleteMany(),
     prisma.eventBanner.deleteMany(),
     prisma.aboutContent.deleteMany(),
+    prisma.contactInfo.deleteMany(),
     prisma.homeContent.deleteMany(),
     prisma.donationGoals.deleteMany(),
     prisma.volunteerAvailabilities.deleteMany(),
@@ -289,6 +289,31 @@ async function main() {
     },
   });
 
+  const aboutContent = await prisma.aboutContent.create({
+    data: {
+      // Header content
+      header_en: "... is a charitable organization ... 🐶",
+      header_th: "... คือองค์กรการกุศล ... 🐶",
+      
+      description_en: "Since its founding in 2008, Big Dog Ranch Rescue has saved over 70,000 dogs! Our mission is to save 10,000 dogs per year, rehabilitate and find them warm homes, and educate people about proper dog care and the importance of spaying and neutering.",
+      description_th: "นับตั้งแต่ก่อตั้งขึ้นในปี 2008 Big Dog Ranch Rescue ได้ช่วยชีวิตสุนัขกว่า 70,000 ตัว! ภารกิจของเราคือการช่วยชีวิตสุนัขให้ได้ 10,000 ตัวต่อปี รักษาและหาบ้านที่อบอุ่นให้กับพวกเขา รวมถึงให้ความรู้แก่ผู้คนเกี่ยวกับการดูแลสุนัขอย่างถูกต้องและความสำคัญของการทำหมันสุนัข",
+  
+      // Help section content
+      help_title_en: "How You Can Help:",
+      help_title_th: "คุณสามารถช่วยได้อย่างไร:",
+  
+      help_content_en: "We rely on donations and support to help sick, abandoned, and abused dogs in our care. Every dog we rescue receives treatment, vaccinations, and spaying. We also rehabilitate, socialize, and work to find new homes for our dogs. But we can't do it alone.",
+      help_content_th: "เราพึ่งพาการบริจาคและการสนับสนุนเพื่อช่วยเหลือสุนัขที่ป่วย ถูกทอดทิ้ง และถูกทารุณกรรมในความดูแลของเรา สุนัขทุกตัวที่เราช่วยเหลือได้รับการรักษา ฉีดวัคซีน และทำหมันแล้ว เรายังฟื้นฟู ฝึกสังคม และพยายามหาบ้านใหม่ให้กับสุนัขของเรา แต่เราทำคนเดียวไม่ได้",
+  
+      // Additional content that can be split using the '|' delimiter
+      content_en: "Mission Statement|Vision|Values|Our Impact",
+      content_th: "พันธกิจ|วิสัยทัศน์|ค่านิยม|ผลกระทบของเรา",
+
+      video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      image: "/src/assets/dog.png",
+    }
+  });
+  
   const donationContent = await prisma.donationContent.create({
     data: {
       title_en: "Make a Difference Today",
@@ -334,6 +359,36 @@ async function main() {
       image1: BANNER_IMAGES[0],
       image2: BANNER_IMAGES[1],
       image3: BANNER_IMAGES[2]
+    }
+  });
+  
+
+  const contactInfo = await prisma.contactInfo.create({
+    data: {
+      // Header and main content
+      header_en: "Get in Touch with Friendly Paws",
+      header_th: "ติดต่อ Friendly Paws",
+      
+      content_en: "We're here to help and answer any questions you might have|Feel free to reach out to us anytime|Your feedback helps us improve our services",
+      content_th: "เราพร้อมช่วยเหลือและตอบคำถามทุกข้อสงสัย|สามารถติดต่อเราได้ตลอดเวลา|ความคิดเห็นของคุณช่วยให้เราพัฒนาบริการให้ดียิ่งขึ้น",
+  
+      // Contact details
+      generalInfo_en: "Animal Shelter and Adoption Center",
+      generalInfo_th: "ศูนย์พักพิงและรับเลี้ยงสัตว์",
+  
+      email: "contact@friendlypaws.org",
+      phone: "+66 2 123 4567",
+  
+      openingTimes_en: "Monday - Sunday: 9:00 AM - 6:00 PM",
+      openingTimes_th: "จันทร์ - อาทิตย์: 9:00 น. - 18:00 น.",
+  
+      address_en: "123 Pet Street, Animal District, Bangkok 10XXX",
+      address_th: "123 ถนนเพ็ท เขตแอนิมอล กรุงเทพฯ 10XXX",
+  
+      // Map coordinates
+      
+      latitude: "13.7583265",
+      longitude: "100.5349709"
     }
   });
   
