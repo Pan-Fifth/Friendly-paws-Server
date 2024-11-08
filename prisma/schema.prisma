@@ -285,13 +285,13 @@ model DonationGoals {
 }
 
 model HomeContent {
-  id         Int    @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   image1     String
   image2     String
   image3     String
   image4     String?
-  content_en String @db.LongText //header, subtitle, img1 title, img1 content, img2 title, img2 content, img3 title, img3 content
-  content_th String @db.LongText
+  content_en String  @db.LongText //header, subtitle, img1 title, img1 content, img2 title, img2 content, img3 title, img3 content
+  content_th String  @db.LongText
 }
 
 model AboutContent {
@@ -316,7 +316,6 @@ model EventBanner {
   image2 String?
   image3 String?
 }
-
 
 model DonationContent {
   id                Int    @id @default(autoincrement())
