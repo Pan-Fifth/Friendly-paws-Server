@@ -2,7 +2,7 @@ const createError = require('../utils/createError')
 const { getChooseEventBydate, getAllEvent, getListUserEventById, getChooseAdoptBydate, getAllAdopt,
     getChooseDonateBydate, getAllDonate, getAllPetList, getAllAdoptRequest, getAdoptScore } = require('../services/admin-report-service')
 const { aiCalScore } = require('../services/ai-scoring')
-
+const prisma = require('../configs/prisma')
 
 exports.reportEventByDate = async (req, res, next) => {
     try {
