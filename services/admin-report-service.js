@@ -194,7 +194,7 @@ exports.getAllAdopt = async () => {
                 socialContact: true,
                 approved_at: true,
                 approved_by: true,
-                notes: true,
+                why: true,
                 created_at: true,
                 user: {
                     select: {
@@ -242,7 +242,8 @@ exports.getChooseDonateBydate = async (startDate, endDate) => {
         const donation = await prisma.donates.findMany({
             where: {
                 created_at: { gte: start },
-                created_at: { lte: end }
+                created_at: { lte: end },
+                status: 'DONE'
             },
             select: {
                 id: true,
