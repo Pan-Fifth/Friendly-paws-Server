@@ -5,6 +5,7 @@ const adminAboutPageController = {
   // ฟังก์ชันดึงข้อมูล AboutContent
   getAboutContent: async (req, res) => {
     try {
+
       const aboutContent = await prisma.aboutContent.findMany(); // ใช้ Prisma ดึงข้อมูล
       res.status(200).json(aboutContent);
     } catch (error) {
