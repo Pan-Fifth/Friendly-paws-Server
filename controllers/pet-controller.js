@@ -300,10 +300,10 @@ exports.updatePets = async (req, res, next) => {
         status: status || petsData.status,
         image: havefile
           ? {
-              update: {
-                url: uploadResult.secure_url,
-              },
-            }
+            update: {
+              url: uploadResult.secure_url,
+            },
+          }
           : undefined,
       },
       include: {
@@ -358,7 +358,7 @@ exports.createAdoptRequest = async (req, res, next) => {
       firstname,
       lastname,
       phone,
-      email,
+
       address,
       career,
       workTime,
@@ -409,7 +409,7 @@ exports.createAdoptRequest = async (req, res, next) => {
         firstname,
         lastname,
         phone,
-        email,
+
       },
     });
 
