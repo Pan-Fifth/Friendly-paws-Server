@@ -86,7 +86,7 @@ exports.pet = async (req, res, next) => {
 
     const petInfo = await prisma.pets.findFirst({
       where: {
-        id: +id,
+        id: Number(id),
         deleted_at: null,
       },
       select: {
@@ -465,5 +465,41 @@ exports.createAdoptRequest = async (req, res, next) => {
   } finally {
     const deleteFile = req.files.map((file) => fs.unlink(file.path));
     await Promise.all(deleteFile);
+  }
+};
+
+exports.getRandomPets = async (req, res, next) => {
+  try {
+    const allPets = await prisma.pets.findMany({
+      where: {
+        status: "AVAILABLE",
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        name_en: true,
+        name_th: true,
+        breed_en: true,
+        breed_th: true,
+        image: {
+          select: {
+            url: true,
+          },
+        },
+      },
+    });
+
+    // Shuffle the array using Fisher-Yates algorithm
+    for (let i = allPets.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allPets[i], allPets[j]] = [allPets[j], allPets[i]];
+    }
+
+    // Take first 5 pets from shuffled array
+    const randomPets = allPets.slice(0, 5);
+
+    res.json(randomPets);
+  } catch (err) {
+    next(err);
   }
 };
