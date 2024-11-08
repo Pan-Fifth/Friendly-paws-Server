@@ -350,8 +350,10 @@ exports.getAllAdoptRequest = async (count, page) => {
             take: +count,
             skip: ((+page) - 1) * count,
             select: {
+                id:true,
                 career: true,
-                address: true,
+                status: true,
+                address:true,
                 workTime: true,
                 workPlace: true,
                 dayOff: true,
@@ -365,6 +367,9 @@ exports.getAllAdoptRequest = async (count, page) => {
                 hasFence: true,
                 canWalkDog: true,
                 deliveryType: true,
+                approved_at:true,
+                approved_by:true,
+                created_at:true,
                 user: {
                     select: {
                         email: true,
