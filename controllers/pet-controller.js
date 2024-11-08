@@ -167,25 +167,15 @@ exports.createPets = async (req, res, next) => {
       is_vaccinated,
       is_neutered,
       weight,
-      userId,
-      image,
     } = req.body;
+
+    console.log(req.files)
 
     if (req.user.role !== "ADMIN") {
       return createError(400, "Unauthorized");
     }
 
-    const havefile = !!req.file;
-    let uploadResult = {};
-
-    if (havefile) {
-      uploadResult = await cloudinary.uploader.upload(req.file.path, {
-        overwrite: true,
-        public_id: path.parse(req.file.path).name,
-      });
-      fs.unlink(req.file.path);
-    }
-
+   
     const isVaccinated = is_vaccinated === "true";
     const isNeutered = is_neutered === "true";
 
@@ -210,24 +200,42 @@ exports.createPets = async (req, res, next) => {
         is_neutered: isNeutered,
         weight: parseFloat(weight),
         status: "AVAILABLE",
-        image: {
-          create: {
-            url: uploadResult.secure_url || "",
-          },
-        },
-      },
-      include: {
-        image: true,
-      },
+      }
     });
 
-    res.json({
-      message: "Pet created",
-      newPet,
-    });
+    const havefile = !!req.files;
+    let arrayUrl = []
+    console.log(havefile, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFf")
+    if (havefile) {
+        console.log(req.files)
+        for(let file of req.files){
+            console.log("file", file)
+            const promiseUrl = await cloudinary.uploader.upload(file.path)
+            arrayUrl.push(promiseUrl)
+        }
+    }
+
+        const imageArray = await Promise.all(arrayUrl)
+        const result = await prisma.petImages.createMany({
+            data: imageArray.map((el) =>{
+                console.log("Element",el)
+                return({
+                    petId: newPet.id,
+                    url : el.secure_url
+            })})
+        })
+
+        console.log("Image object --------------------------------------",result)
+
+    res.json({message: "Pet created",newPet , result});
   } catch (err) {
     console.log("Error creating pet:", err);
     next(err);
+  }finally{
+    const deleteFile = req.files.map((file) => {
+      fs.unlink(file.path);
+    });
+    await Promise.all(deleteFile);
   }
 };
 
@@ -250,33 +258,71 @@ exports.updatePets = async (req, res, next) => {
       is_neutered,
       weight,
       status,
-      image,
+      deleteImage,
+      deleteImageId,
     } = req.body;
+    console.log("delete img", deleteImageId);
+    const arrDeleteImage = deleteImage.split(",");
+    const arrDeleteImageId = deleteImageId.includes(",") ? split(deleteImageId, ",") : [deleteImageId];
+    
+    arrDeleteImage.map(async(el) => {
+      if(el.includes("cloudinary")){
+        console.log("delete", el)
+        await cloudinary.uploader.destroy(el.match(/\/v\d+\/(.+)\.[a-z]+$/)[1]);
+        
+      }
+    });
+    arrDeleteImageId.map(async(el) => {
+      try {
+        console.log("delete", el)
+        const image = await prisma.petImages.findUnique({
+          where: {
+            id: +el
+          }
+        });
+        
+        if (image) {
+          await prisma.petImages.delete({
+            where: {
+              id: +el,
+            },
+          });
+        }
+      } catch (error) {
+        console.log(`Failed to delete image with id ${el}:`, error);
+      }
+    })
+   
+    const havefile = !!req.files;
+    let arrayUrl = []
+    console.log(havefile, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFf")
+    if (havefile) {
+        console.log(req.files)
+        for(let file of req.files){
+            console.log("file", file)
+            const promiseUrl = await cloudinary.uploader.upload(file.path)
+            arrayUrl.push(promiseUrl)
+        }
+    }
 
-    const havefile = !!req.file;
-    let uploadResult = {};
+        const imageArray = await Promise.all(arrayUrl)
+        const result = await prisma.petImages.createMany({
+            data: imageArray.map((el) =>{
+                console.log("Element",el)
+                return({
+                    petId: +id,
+                    url : el.secure_url
+            })})
+        })
+
+    const isVaccinated = is_vaccinated === "true";
+    const isNeutered = is_neutered === "true";
 
     const petsData = await prisma.pets.findUnique({
       where: {
         id: +id,
-        deleted_at: null,
       },
     });
-
-    if (!petsData) {
-      return createError(400, "Pet not found");
-    }
-
-    if (havefile) {
-      uploadResult = await cloudinary.uploader.upload(req.file.path, {
-        overwrite: true,
-        public_id: path.parse(req.file.path).name,
-      });
-      fs.unlink(req.file.path);
-    }
-
-    const isVaccinated = is_vaccinated === "true";
-    const isNeutered = is_neutered === "true";
 
     const updatedPet = await prisma.pets.update({
       where: {
@@ -298,16 +344,6 @@ exports.updatePets = async (req, res, next) => {
         is_neutered: isNeutered,
         weight: weight ? parseFloat(weight) : petsData.weight,
         status: status || petsData.status,
-        image: havefile
-          ? {
-              update: {
-                url: uploadResult.secure_url,
-              },
-            }
-          : undefined,
-      },
-      include: {
-        image: true,
       },
     });
 
