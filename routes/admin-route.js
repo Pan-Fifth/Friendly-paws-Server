@@ -14,7 +14,7 @@ const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/
 
 const { reportEventByDate, reportAllEvent, reportAdoptByDate, reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList, allAdoptRequest, checkScore } = require('../controllers/admin-report-controller');
 const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require('../controllers/admin-controller');
-const { createEvent, deleteEvent, updateEvent } = require("../controllers/event-controller");
+const { createEvent, deleteEvent, updateEvent, getEventAttendees } = require("../controllers/event-controller");
 const uploadMulter = require("../middlewares/upload-Event");
 const { authenticate } = require("../middlewares/authenticate");
 const adminHomePageController = require('../controllers/admin-homepage-controller');
@@ -54,6 +54,7 @@ router.put('/manage-donation/:id', updateDonation);
 router.post('/events', authenticate, uploadMulter.single('image'), createEvent);
 router.patch('/updateEvent/:id', authenticate, updateEvent)
 router.delete('/deleteEvent/:id', authenticate, deleteEvent)
+
 
 // จัดการ Donation Goals
 router.get('/', getDonationGoals);
