@@ -377,7 +377,7 @@ exports.createAdoptRequest = async (req, res, next) => {
       hasFence,
       canWalkDog,
       deliveryType,
-      notes,
+      why,
     } = req.input;
 
     const hasAdopt = await prisma.adopts.findFirst({
@@ -434,7 +434,7 @@ exports.createAdoptRequest = async (req, res, next) => {
       hasFence,
       canWalkDog,
       deliveryType,
-      notes,
+      why,
     };
 
     const createAdoptRequest = await prisma.adopts.create({
@@ -454,7 +454,7 @@ exports.createAdoptRequest = async (req, res, next) => {
     const imageArray = await Promise.all(imagePromiseArray);
     const homePics = await prisma.homeImages.createMany({
       data: imageArray.map((el) => ({
-        userId: +userId,
+        adoptId: createAdoptRequest.id,
         url: el.secure_url,
       })),
     });
