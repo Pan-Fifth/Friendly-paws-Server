@@ -27,12 +27,7 @@ module.exports.updateUserById = async (req, res, next) => {
   const { email, firstname, lastname, phone, role } = req.body;
 
   try {
-    // ตรวจสอบว่า user ที่ทำการร้องขอเป็น Admin หรือไม่
-    // if (req.user.role !== 'ADMIN') {
-    //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
-    // }
 
-    // อัปเดตข้อมูลผู้ใช้
     const updatedUser = await prisma.users.update({
       where: { id: parseInt(id) },
       data: {
@@ -123,7 +118,11 @@ module.exports.getDashboard = async (req, res, next) => {
       totalEvents,
       totalVolunteers
     ] = await Promise.all([
-      prisma.users.count(),
+      prisma.users.count({
+        where: {
+          role: 'USER'
+        }
+      }),
       prisma.pets.count(),
       prisma.adopts.count(),
       prisma.donates.count(),

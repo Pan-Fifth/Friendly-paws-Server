@@ -2,6 +2,7 @@ const createError = require('../utils/createError')
 const { getChooseEventBydate, getAllEvent, getListUserEventById, getChooseAdoptBydate, getAllAdopt,
     getChooseDonateBydate, getAllDonate, getAllPetList, getAllAdoptRequest, getAdoptScore } = require('../services/admin-report-service')
 const { aiCalScore } = require('../services/ai-scoring')
+const prisma = require("../configs/prisma");
 
 
 exports.reportEventByDate = async (req, res, next) => {
@@ -132,38 +133,38 @@ exports.checkScore = async (req, res, next) => {
     }
 }
 
-exports.editAdoptRequest = async(req,res,next)=>{
+exports.editAdoptRequest = async (req, res, next) => {
     try {
-        const {id} = req.params
-        const {select} = req.body
+        const { id } = req.params
+        const { select } = req.body
         const user = req.user
-        console.log("id",id,"status",select,"user",user)
-        if(user.role !== "ADMIN"){
-            return createError(402,"Unauthorized")
+        console.log("id", id, "status", select, "user", user)
+        if (user.role !== "ADMIN") {
+            return createError(402, "Unauthorized")
         }
         const updateAdoptRequest = await prisma.adopts.update({
-            where:{
+            where: {
                 id: +id
             },
-            data:{
-                status:select,
+            data: {
+                status: select,
                 approved_at: new Date(),
                 approved_by: +user.id
             }
         })
-        if(select === "ADOPTED"){
+        if (select === "ADOPTED") {
             const updatePet = await prisma.pets.update({
-            where:{
-                id: +updateAdoptRequest.petId
-            },
-            data:{
-                status:select,
-                updated_at: new Date()
-            }
-        })
-        
+                where: {
+                    id: +updateAdoptRequest.petId
+                },
+                data: {
+                    status: select,
+                    updated_at: new Date()
+                }
+            })
+
         }
-     
+
         res.json("complete")
     } catch (err) {
         next(err)
