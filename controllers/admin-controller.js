@@ -41,7 +41,7 @@ module.exports.updateUserById = async (req, res, next) => {
 
     res.json(updatedUser);
   } catch (error) {
-    next(createError(500, 'Failed to update user.'));
+    next(error);
   }
 };
 
@@ -83,7 +83,7 @@ module.exports.deleteUserById = async (req, res, next) => {
 
     res.status(204).send(); // ส่งสถานะ 204 No Content หลังจากลบสำเร็จ
   } catch (error) {
-    next(createError(500, 'Failed to delete user.'));
+    next(error);
   }
 };
 

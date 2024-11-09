@@ -9,13 +9,10 @@ const uploadFields = upload.fields([
   { name: 'image4', maxCount: 1 }
 ]);
 
-
-const { getAllUsers, updateUserById, deleteUserById } = require("../controllers/admin-controller");
-
+const { getAllUsers, updateUserById, deleteUserById, getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require("../controllers/admin-controller");
 const { reportEventByDate, reportAllEvent, reportListUserEvent, reportAdoptByDate,
   reportAllAdopt, reportDonateByDate, reportAllDonate, reportAllPetList, allAdoptRequest, checkScore, editAdoptRequest } = require('../controllers/admin-report-controller');
-const { getDashboard, getDonation, updateDonation, getDonationGoals, updateDonationGoals } = require('../controllers/admin-controller');
-const { createEvent, deleteEvent, updateEvent, getEventAttendees } = require("../controllers/event-controller");
+const { createEvent, deleteEvent, updateEvent } = require("../controllers/event-controller");
 const uploadMulter = require("../middlewares/upload-Event");
 const { authenticate } = require("../middlewares/authenticate");
 const adminHomePageController = require('../controllers/admin-homepage-controller');
@@ -24,8 +21,6 @@ const adminContactController = require('../controllers/admin-contact-controller'
 const donationPageController = require('../controllers/admin-donation-controller')
 const eventPageController = require('../controllers/admin-event-controller')
 const contactPageController = require('../controllers/admin-contact-controller')
-
-
 // รายงาน
 router.get('/report-event', authenticate, reportEventByDate);
 router.get('/report-event-all', authenticate, reportAllEvent);
@@ -38,8 +33,8 @@ router.get('/report-pet-all', authenticate, reportAllPetList);
 
 // จัดการผู้ใช้
 router.get('/users', getAllUsers);
-router.put('/users/:id', updateUserById);
-router.delete('/users/:id', deleteUserById);
+router.put('/users/:id', authenticate, updateUserById);
+router.delete('/users/:id', authenticate, deleteUserById);
 
 // all adopt request for adopt manage page
 router.get("/all-adopts/:count/:page", authenticate, allAdoptRequest)
