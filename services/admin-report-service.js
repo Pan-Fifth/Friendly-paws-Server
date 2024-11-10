@@ -343,10 +343,11 @@ exports.getAllPetList = async () => {
     }
 };
 
-exports.getAllAdoptRequest = async (count, page) => {
+exports.getAllAdoptRequest = async (count, page,filter) => {
     try {
         const result = await prisma.adopts.findMany({
-            orderBy: { id: "desc" },
+            where: filter === "ALL" ? {} : { status: filter },
+            orderBy: { status: "asc" },
             take: +count,
             skip: ((+page) - 1) * count,
             select: {

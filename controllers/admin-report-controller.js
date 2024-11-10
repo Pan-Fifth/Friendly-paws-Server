@@ -4,6 +4,7 @@ const { getChooseEventBydate, getAllEvent, getListUserEventById, getChooseAdoptB
 const { aiCalScore } = require('../services/ai-scoring')
 
 
+
 exports.reportEventByDate = async (req, res, next) => {
     try {
         const { startDate, endDate } = req.query;
@@ -105,12 +106,13 @@ exports.reportAllPetList = async (req, res, next) => {
 
 exports.allAdoptRequest = async (req, res, next) => {
     try {
-        const { count, page } = req.params
+        const { count, page ,filter} = req.params
         const user = req.user
+        console.log("filter",filter)
         if (user.role !== "ADMIN") {
             return createError(401, "unauthorized")
         }
-        const adoptRequest = await getAllAdoptRequest(count, page);
+        const adoptRequest = await getAllAdoptRequest(count, page,filter);
         res.json(adoptRequest)
     } catch (err) {
         next(err)

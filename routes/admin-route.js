@@ -33,7 +33,7 @@ router.get('/report-adopt', reportAdoptByDate);
 router.get('/report-adopt-all', reportAllAdopt);
 
 // all adopt request for adopt manage page
-router.get("/all-adopts/:count/:page", authenticate, allAdoptRequest)
+router.get("/all-adopts/:count/:filter/:page", authenticate, allAdoptRequest)
 router.get("/score/:id/:lang", authenticate, checkScore)
 // edit adopt request
 router.patch("/edit-adopt-request/:id",authenticate,editAdoptRequest)
