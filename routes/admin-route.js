@@ -64,7 +64,7 @@ router.put('/home-content/:id', uploadFields, adminHomePageController.updateHome
 
 // จัดการข้อมูล About Content
 router.get('/about-content', adminAboutPageController.getAboutContent);
-router.put('/about-content/:id', uploadFields, adminAboutPageController.updateAboutContent);
+router.put('/about-content/:id',uploadFields, adminAboutPageController.updateAboutContent);
 
 // จัดการข้อมูล ContactInfo
 router.get('/contact-info', adminContactController.getContactInfo);  // ดึงข้อมูล ContactInfo

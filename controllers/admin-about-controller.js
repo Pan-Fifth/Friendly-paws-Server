@@ -1,5 +1,6 @@
 const prisma = require("../configs/prisma");
 const cloudinary = require("../configs/cloudinary");
+const fs =require("fs/promises")
 
 const adminAboutPageController = {
   // ฟังก์ชันดึงข้อมูล AboutContent
@@ -34,13 +35,26 @@ const adminAboutPageController = {
       } = req.body;
 
       const files = req.files;
+      console.log("file",files)
+      
       let updateData = {};
-
-      if (files && files.image) {
-        const imageResult = await cloudinary.uploader.upload(files.image[0].path, {
-          folder: "aboutpage",
-        });
-        updateData.image = imageResult.secure_url;
+      if (files) {
+        const prevImg = await prisma.aboutContent.findFirst({
+          where: {
+            id: +id
+          }
+        })
+        for(let key in files){
+          console.log("prev img",prevImg[key])
+          if (prevImg[key].includes("cloudinary")) {
+            await cloudinary.uploader.destroy(prevImg[key].match(/\/v\d+\/(.+)\.[a-z]+$/)[1]);
+          }
+          const imageResult = await cloudinary.uploader.upload(files[key][0].path, {
+            folder: "aboutpage",
+          });
+          updateData[key] = imageResult.secure_url;
+          fs.unlink(files[key][0].path)
+        }
       }
 
       // Update all possible fields from schema
