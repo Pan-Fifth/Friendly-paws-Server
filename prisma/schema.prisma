@@ -27,6 +27,9 @@ model Users {
   created_at        DateTime         @default(now()) @db.Timestamp(0)
   updated_at        DateTime         @updatedAt @db.Timestamp(0)
   role              Role             @default(USER)
+  isVerify          Boolean?         @default(false)
+  facebookId        String?
+  tokenFacebook     String?         
   // Relations
   pets              Pets[]
   adoptions         Adopts[]         @relation("UserAdoptions")
@@ -299,7 +302,10 @@ model HomeContent {
 model AboutContent {
   id              Int    @id @default(autoincrement())
   video_url       String
-  image           String
+  image1          String? @default("https://cdn.pixabay.com/photo/2021/01/30/15/15/dog-5964181_1280.jpg")
+  image2          String? @default("https://cdn.pixabay.com/photo/2024/07/31/06/12/stray-8933778_1280.png")
+  image3          String? @default("https://cdn.pixabay.com/photo/2023/03/14/14/57/cat-box-7852492_1280.jpg")
+  image4          String? @default("https://cdn.pixabay.com/photo/2020/11/17/18/20/dog-5753302_1280.jpg")
   header_en       String @db.Text
   header_th       String @db.Text
   description_en  String @db.Text
