@@ -28,7 +28,23 @@ exports.register = async (req, res, next) => {
 
         const newUser = await createNewUser(hashPassword, email)
 
-        res.json({ newUser })
+        const token = jwt.sign({user:newUser.id},process.env.JWT_SECRET,{expiresIn:"7d"})
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth:{
+            user: process.env.EMAIL_ADMIN,
+            pass: process.env.EMAIL_PASS
+          }
+        })
+        const verificationLink =`${process.env.BASE_URL}/auth/verification/${token}`
+        
+        await transporter.sendMail({
+          to: email,
+          subject: "Email Verification by Friendly Paws",
+          // text: "Please verify your email by clicking on this link: ",
+          html: `<p>Please verify by clicking the following link : </p> <a href=${verificationLink} target="_blank" rel="noopener noreferrer">Click this link</a>`,
+        });
+        res.json({message:"verification email has been sent to your email!!",newUser})
 
     } catch (err) {
 
@@ -257,3 +273,32 @@ exports.getTermsOfService = (req, res) => {
         <p>Information on our liability and legal limitations.</p>
     `);
 };
+
+exports.verification =async(req,res,next)=>{
+    try {
+      const {token} = req.params
+      const headers = jwt.verify(token,process.env.JWT_SECRET)
+      if(!headers){
+       return createError(404,"token missing")
+      }
+      const user = await prisma.users.findFirst({
+        where:{id:headers.user}
+      })
+      console.log(user)
+      if(!user){
+       return createError(404,"user not existed")
+      }
+      const verify = await prisma.users.update({
+        where:{
+          id:headers.user
+        },
+        data:{
+          isVerify: true
+        }
+      })
+      // res.json({message:"account has been verified",redirectUrl:"https://localhost:5173/login" })
+      res.redirect('http://localhost:5173')
+    } catch (err) {
+      next(err)
+    }
+  }
