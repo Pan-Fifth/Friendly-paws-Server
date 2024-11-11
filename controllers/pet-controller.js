@@ -312,6 +312,7 @@ exports.updatePets = async (req, res, next) => {
         console.log("file", file)
         const promiseUrl = await cloudinary.uploader.upload(file.path)
         arrayUrl.push(promiseUrl)
+        fs.unlink(file.path);
       }
     }
 
@@ -360,7 +361,7 @@ exports.updatePets = async (req, res, next) => {
 
         res.json({
             message: 'Pet created',
-            newPet,
+            updatedPet,
         });
 
 
@@ -370,95 +371,6 @@ exports.updatePets = async (req, res, next) => {
     }
 }
 
-
-exports.updatePets = async (req, res, next) => {
-    try {
-        const { id } = req.params
-        const {
-            name_en,
-            name_th,
-            age,
-            color,
-            gender,
-            type,
-            breed_en,
-            breed_th,
-            description_en,
-            description_th,
-            medical_history,
-            is_vaccinated,
-            is_neutered,
-            weight,
-            status,
-            image
-        } = req.body;
-
-        const havefile = !!req.file
-        let uploadResult = {}
-
-        const petsData = await prisma.pets.findUnique({
-            where: {
-                id: +id
-            }
-        })
-
-        if (!petsData) {
-            return createError(400, "Pet not found")
-        }
-
-        if (havefile) {
-            uploadResult = await cloudinary.uploader.upload(req.file.path, {
-                overwrite: true,
-                public_id: path.parse(req.file.path).name
-
-            })
-            fs.unlink(req.file.path)
-        }
-
-        const isVaccinated = is_vaccinated === 'true'
-        const isNeutered = is_neutered === 'true'
-
-        const updatedPet = await prisma.pets.update({
-            where: {
-                id: +id
-            },
-            data: {
-                name_en: name_en || petsData.name_en,
-                name_th: name_th || petsData.name_th,
-                age: age ? new Date(age) : petsData.age,
-                color: color || petsData.color,
-                gender: gender || petsData.gender,
-                type: type || petsData.type,
-                breed_en: breed_en || petsData.breed_en,
-                breed_th: breed_th || petsData.breed_th,
-                description_en: description_en || petsData.description_en,
-                description_th: description_th || petsData.description_th,
-                medical_history: medical_history || petsData.medical_history,
-                is_vaccinated: isVaccinated,
-                is_neutered: isNeutered,
-                weight: weight ? parseFloat(weight) : petsData.weight,
-                status: status || petsData.status,
-                image: havefile ? {
-                    update: {
-                        url: uploadResult.secure_url
-                    }
-                } : undefined
-            },
-            include: {
-                image: true
-            }
-        });
-
-        res.json({
-            message: 'Pet updated successfully',
-            updatedPet
-        });
-
-    } catch (err) {
-        console.log('Error Update pet:', err);
-        next(err)
-    }
-}
 
 exports.deletePets = async (req, res, next) => {
     try {
