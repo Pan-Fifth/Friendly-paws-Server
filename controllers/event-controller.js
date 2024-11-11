@@ -214,7 +214,7 @@ exports.deleteEvent = async (req, res, next) => {
 exports.updateEvent = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const { title_en, title_th, description_en, description_th, date_start, date_end, location } =
+    const { title_en, title_th, description_en, description_th, date_start, date_end, location, status } =
       req.body;
 
     const event = await prisma.events.findUnique({
@@ -240,6 +240,7 @@ exports.updateEvent = async (req, res, next) => {
         date_start: new Date(date_start),
         date_end: new Date(date_end),
         location,
+        status,
       },
     });
 
