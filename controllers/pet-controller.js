@@ -1,81 +1,88 @@
-const { date } = require("joi");
-const prisma = require("../configs/prisma");
-const createError = require("../utils/createError");
-const cloudinary = require("../configs/cloudinary");
-const path = require("path");
-const fs = require("fs/promises");
+const { date } = require('joi')
+const prisma = require('../configs/prisma')
+const createError = require('../utils/createError')
+const cloudinary = require('../configs/cloudinary')
+const path = require('path')
+const fs = require('fs/promises')
+
 
 exports.aPets = async (req, res, next) => {
-  try {
-    const { gender, age, weight } = req.query;
-    const { count, page } = req.params;
-    let ageFilter = {};
-    const now = new Date();
-    const daysInMs = 24 * 60 * 60 * 1000;
+    try {
+        console.log("query", req.query)
+        const { gender, age, weight } = req.query
+        const { count, page } = req.params
 
-    if (age) {
-      switch (age) {
-        case "KID":
-          ageFilter.age = {
-            gte: new Date(now - 190 * daysInMs),
-          };
-          break;
-        case "JUNIOR":
-          ageFilter.age = {
-            gte: new Date(now - 730 * daysInMs),
-            lt: new Date(now - 190 * daysInMs),
-          };
-          break;
-        case "SENIOR":
-          ageFilter.age = {
-            gte: new Date(now - 2557 * daysInMs),
-            lt: new Date(now - 730 * daysInMs),
-          };
-          break;
-        case "ADULT":
-          ageFilter.age = { lt: new Date(now - 2557 * daysInMs) };
-          break;
-      }
+        let ageFilter = {};
+        const now = new Date();
+        const daysInMs = 24 * 60 * 60 * 1000;
+
+        if (age) {
+            switch (age) {
+                case 'KID':
+                    ageFilter.age = {
+                        gte: new Date(now - (190 * daysInMs)),
+                        // lt: new Date(now )
+                    }
+                    break;
+                case 'JUNIOR':
+                    ageFilter.age = {
+                        gte: new Date(now - (730 * daysInMs)),
+                        lt: new Date(now - (190 * daysInMs))
+                    };
+                    break;
+                case 'SENIOR':
+                    ageFilter.age = {
+                        gte: new Date(now - (2557 * daysInMs)),
+                        lt: new Date(now - (730 * daysInMs))
+                    };
+                    break;
+                case 'ADULT':
+                    ageFilter.age = { lt: new Date(now - (2557 * daysInMs)) };
+                    break;
+            }
+        }
+        const allAvaiPets = await prisma.pets.findMany({
+            where: {
+                status: "AVAILABLE",
+                gender,
+                ...ageFilter,
+                weight
+            },
+            take: parseInt(count),
+            orderBy: { created_at: "desc" },
+            skip: ((+page) - 1) * count,
+            select: {
+                id: true,
+                name_en: true,
+                name_th: true,
+                age: true,
+                gender: true,
+                weight: true,
+                image: {
+                    select: {
+                        url: true
+                    }
+                }
+            },
+        })
+
+        allAvaiPets.map((petInfo) => {
+            console.log(petInfo)
+            const birthDay = petInfo.age
+            const age = (new Date() - birthDay) / 86400000
+            petInfo.birthDay = birthDay
+            petInfo.age = age
+        })
+
+        console.log("getApets")
+        res.json(allAvaiPets)
+        // res.json(count)
+    } catch (err) {
+        next(err)
     }
+}
 
-    const allAvaiPets = await prisma.pets.findMany({
-      where: {
-        status: "AVAILABLE",
-        deleted_at: null,
-        gender,
-        ...ageFilter,
-        weight,
-      },
-      take: parseInt(count),
-      orderBy: { created_at: "desc" },
-      skip: (+page - 1) * count,
-      select: {
-        id: true,
-        name_en: true,
-        name_th: true,
-        age: true,
-        gender: true,
-        weight: true,
-        image: {
-          select: {
-            url: true,
-          },
-        },
-      },
-    });
 
-    allAvaiPets.map((petInfo) => {
-      const birthDay = petInfo.age;
-      const age = (new Date() - birthDay) / 86400000;
-      petInfo.birthDay = birthDay;
-      petInfo.age = age;
-    });
-
-    res.json(allAvaiPets);
-  } catch (err) {
-    next(err);
-  }
-};
 
 exports.pet = async (req, res, next) => {
   try {
@@ -129,26 +136,28 @@ exports.pet = async (req, res, next) => {
 };
 
 exports.allPets = async (req, res, next) => {
-  try {
-    const user = req.user;
-    if (user.role !== "ADMIN") {
-      return createError(400, "Unauthorized");
+    try {
+        const user = req.user
+
+        if (user.role !== "ADMIN") {
+            return createError(400, "Unauthorized")
+        }
+        const getAllpets = await prisma.pets.findMany({
+            include: {
+                image: true
+            }
+
+        })
+
+        res.json(getAllpets)
+
+    } catch (err) {
+        next(err)
     }
+}
 
-    const getAllpets = await prisma.pets.findMany({
-      where: {
-        deleted_at: null,
-      },
-      include: {
-        image: true,
-      },
-    });
 
-    res.json(getAllpets);
-  } catch (err) {
-    next(err);
-  }
-};
+
 
 exports.createPets = async (req, res, next) => {
   try {
@@ -171,17 +180,17 @@ exports.createPets = async (req, res, next) => {
 
     console.log(req.files)
 
-    if (req.user.role !== "ADMIN") {
-      return createError(400, "Unauthorized");
-    }
+        if (req.user.role !== "ADMIN") {
+            return createError(400, "Unauthorized")
+        }
 
 
     const isVaccinated = is_vaccinated === "true";
     const isNeutered = is_neutered === "true";
 
-    if (!name_en || !name_th || !age || !color || !gender || !type) {
-      return res.status(400).json({ message: "Missing required fields." });
-    }
+        if (!name_en || !name_th || !age || !color || !gender || !type) {
+            return res.status(400).json({ message: 'Missing required fields.' });
+        }
 
     const newPet = await prisma.pets.create({
       data: {
@@ -303,6 +312,7 @@ exports.updatePets = async (req, res, next) => {
         console.log("file", file)
         const promiseUrl = await cloudinary.uploader.upload(file.path)
         arrayUrl.push(promiseUrl)
+        fs.unlink(file.path);
       }
     }
 
@@ -349,44 +359,42 @@ exports.updatePets = async (req, res, next) => {
       },
     });
 
-    res.json({
-      message: "Pet updated successfully",
-      updatedPet,
-    });
-  } catch (err) {
-    console.log("Error Update pet:", err);
-    next(err);
-  }
-};
+        res.json({
+            message: 'Pet created',
+            updatedPet,
+        });
+
+
+    } catch (err) {
+        console.log('Error creating pet:', err);
+        next(err)
+    }
+}
+
 
 exports.deletePets = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const petsData = await prisma.pets.findUnique({
-      where: {
-        id: +id,
-        deleted_at: null,
-      },
-    });
+    try {
+        const { id } = req.params
+        const petsData = await prisma.pets.findUnique({
+            where: {
+                id: +id
+            }
+        })
+        if (!petsData) {
+            return createError(400, "Pet not found")
+        }
+        const deletePets = await prisma.pets.delete({
+            where: {
+                id: +id
+            }
+        })
+        res.json({ message: 'Pet deleted successfully', deletePets })
 
-    if (!petsData) {
-      return createError(400, "Pet not found");
+    } catch (err) {
+        next(err)
     }
 
-    const deletePets = await prisma.pets.update({
-      where: {
-        id: +id,
-      },
-      data: {
-        deleted_at: new Date(),
-      },
-    });
-
-    res.json({ message: "Pet deleted successfully", deletePets });
-  } catch (err) {
-    next(err);
-  }
-};
+}
 
 exports.createAdoptRequest = async (req, res, next) => {
   try {
@@ -479,15 +487,14 @@ exports.createAdoptRequest = async (req, res, next) => {
       data: data,
     });
 
-    if (req.files.length < 1) {
-      return createError(400, "no file given");
-    }
-
-    const imagePromiseArray = [];
-    for (let file of req.files) {
-      const promiseUrl = cloudinary.uploader.upload(file.path);
-      imagePromiseArray.push(promiseUrl);
-    }
+        if (req.files.length < 1) {
+            return createError(400, "no file given")
+        }
+        const imagePromiseArray = []
+        for (let file of req.files) {
+            const promiseUrl = cloudinary.uploader.upload(file.path)
+            imagePromiseArray.push(promiseUrl)
+        }
 
     const imageArray = await Promise.all(imagePromiseArray);
     const homePics = await prisma.homeImages.createMany({

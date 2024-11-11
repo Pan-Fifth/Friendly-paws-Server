@@ -2,9 +2,7 @@ const {GoogleGenerativeAI} = require("@google/generative-ai")
 
 exports.aiCalScore = async (formData,language) => {
     try {
-        console.log("language",language)
         const genAI = new GoogleGenerativeAI("AIzaSyDFQP49YT2evf8SvHVHcWDfPazJxH3egYM")
-        console.log(formData.career)
 
         const model = genAI.getGenerativeModel({
             model: "gemini-1.5-flash",
@@ -55,16 +53,15 @@ exports.aiCalScore = async (formData,language) => {
         
         โปรดให้คะแนนความเหมาะสมในการรับเลี้ยงสัตว์จาก 1-100 ตามปัจจัยต่างๆ เช่น ตารางเวลาทำงาน, สถานการณ์ครอบครัว, การอยู่อาศัย, สถานะทางการเงิน, และความสามารถในการดูแลสัตว์เลี้ยง
         
-        กรุณาตอบในรูปแบบ JSON ดังนี้:
+        ตอบในรูปแบบ JSON ดังนี้:
         message = {'shortDetail':string, 'score':string} 
         `; 
         }
-       
+        
         const result = await model.generateContent(prompt);
-        const outPut = result.response.text()
+        const outPut = await result.response.text()
         const cleanJson = outPut.replace(/```json\n|\n```/g, '');
-        console.log(cleanJson);
-
+        
         return JSON.parse(cleanJson)
        
     } catch (err) {

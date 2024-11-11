@@ -96,6 +96,8 @@ enum Status {
   ADOPTED
   FOSTERED
   UNAVAILABLE
+  REJECT
+  INTERVIEW
 }
 
 model PetImages {

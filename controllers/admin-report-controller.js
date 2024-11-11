@@ -2,9 +2,15 @@ const createError = require('../utils/createError')
 const { getChooseEventBydate, getAllEvent, getListUserEventById, getChooseAdoptBydate, getAllAdopt,
     getChooseDonateBydate, getAllDonate, getAllPetList, getAllAdoptRequest, getAdoptScore } = require('../services/admin-report-service')
 const { aiCalScore } = require('../services/ai-scoring')
+const prisma = require("../configs/prisma");
 
 
 exports.reportEventByDate = async (req, res, next) => {
+
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return createError(401, 'Unauthorized: No token provided');
+    }
     try {
         const { startDate, endDate } = req.query;
 
@@ -21,6 +27,10 @@ exports.reportEventByDate = async (req, res, next) => {
 };
 
 exports.reportAllEvent = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return createError(401, 'Unauthorized: No token provided');
+    }
     try {
         const event = await getAllEvent();
         res.json(event);
@@ -31,7 +41,10 @@ exports.reportAllEvent = async (req, res, next) => {
 };
 exports.reportListUserEvent = async (req, res, next) => {
     const { eventId } = req.params;
-    console.log(eventId, "jsdjflkd")
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return createError(401, 'Unauthorized: No token provided');
+    }
     try {
         const event = await getListUserEventById(eventId);
         res.json(event);
@@ -42,6 +55,10 @@ exports.reportListUserEvent = async (req, res, next) => {
 
 
 exports.reportAdoptByDate = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return createError(401, 'Unauthorized: No token provided');
+    }
     try {
         const { startDate, endDate } = req.query;
 
@@ -49,11 +66,7 @@ exports.reportAdoptByDate = async (req, res, next) => {
             return createError(400, 'Start date and End date are required');
         }
 
-
         const adopt = await getChooseAdoptBydate(startDate, endDate);
-        console.log('adopt :>> ', adopt);
-
-
 
         res.json(adopt);
     } catch (err) {
@@ -62,6 +75,10 @@ exports.reportAdoptByDate = async (req, res, next) => {
 };
 
 exports.reportAllAdopt = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return createError(401, 'Unauthorized: No token provided');
+    }
     try {
         const adopt = await getAllAdopt();
         res.json(adopt);
@@ -71,6 +88,10 @@ exports.reportAllAdopt = async (req, res, next) => {
 };
 
 exports.reportDonateByDate = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return createError(401, 'Unauthorized: No token provided');
+    }
     try {
         const { startDate, endDate } = req.query;
 
@@ -87,6 +108,10 @@ exports.reportDonateByDate = async (req, res, next) => {
 };
 
 exports.reportAllDonate = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return createError(401, 'Unauthorized: No token provided');
+    }
     try {
         const donation = await getAllDonate();
         res.json(donation);
@@ -95,6 +120,10 @@ exports.reportAllDonate = async (req, res, next) => {
     }
 };
 exports.reportAllPetList = async (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return createError(401, 'Unauthorized: No token provided');
+    }
     try {
         const pets = await getAllPetList();
         res.json(pets);
@@ -131,3 +160,42 @@ exports.checkScore = async (req, res, next) => {
         next(err)
     }
 }
+
+exports.editAdoptRequest = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        const { select } = req.body
+        const user = req.user
+        console.log("id", id, "status", select, "user", user)
+        if (user.role !== "ADMIN") {
+            return createError(402, "Unauthorized")
+        }
+        const updateAdoptRequest = await prisma.adopts.update({
+            where: {
+                id: +id
+            },
+            data: {
+                status: select,
+                approved_at: new Date(),
+                approved_by: +user.id
+            }
+        })
+        if (select === "ADOPTED") {
+            const updatePet = await prisma.pets.update({
+                where: {
+                    id: +updateAdoptRequest.petId
+                },
+                data: {
+                    status: select,
+                    updated_at: new Date()
+                }
+            })
+
+        }
+
+        res.json("complete")
+    } catch (err) {
+        next(err)
+    }
+}
+

@@ -84,9 +84,7 @@ exports.eventShowPages = async (req, res) => {
 exports.regisEvent = async (req, res, next) => {
   try {
     const userId = req.user;
-    console.log("userId", userId);
     const { eventId } = req.body;
-    console.log("eventId", eventId);
     const event = await prisma.events.findUnique({
       where: {
         id: +eventId.eventId,

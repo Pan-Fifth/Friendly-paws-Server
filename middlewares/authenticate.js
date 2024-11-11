@@ -14,9 +14,6 @@ exports.authenticate = (req, res, next) => {
 
         const token = authHeader.split(" ")[1]
 
-        console.log(authHeader)
-
-
         jwt.verify(token, process.env.JWT_SECRET, (err, code) => {
 
             if (err) {
@@ -25,7 +22,7 @@ exports.authenticate = (req, res, next) => {
             }
 
             req.user = code.user
-            
+
             next()
         })
     } catch (err) {
