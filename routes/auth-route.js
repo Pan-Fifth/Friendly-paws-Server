@@ -13,7 +13,8 @@ router.get('/terms', getTermsOfService);
 router.post('/forget-password', forgetPassword);
 router.post('/reset-password/:token', resetPassword);
 
-
+console.log("register:", register);
+console.log("registerAuthen:", registerAuthen);
 
 
 module.exports = router;
