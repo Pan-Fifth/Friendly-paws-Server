@@ -19,14 +19,7 @@ exports.getChooseEventBydate = async (startDate, endDate) => {
             where: {
                 date_start: { gte: start },
                 date_end: { lte: end },
-                OR: [
-                    {
-                        status: 'ACTIVE'
-                    },
-                    {
-                        status: 'COMPLETED'
-                    }
-                ]
+
             },
             select: {
                 id: true,
@@ -143,7 +136,7 @@ exports.getChooseAdoptBydate = async (startDate, endDate) => {
                 socialContact: true,
                 approved_at: true,
                 approved_by: true,
-                notes: true,
+                why: true,
                 created_at: true,
                 user: {
                     select: {
@@ -243,7 +236,6 @@ exports.getChooseDonateBydate = async (startDate, endDate) => {
             where: {
                 created_at: { gte: start },
                 created_at: { lte: end },
-                status: 'DONE'
             },
             select: {
                 id: true,
@@ -346,14 +338,17 @@ exports.getAllPetList = async () => {
 exports.getAllAdoptRequest = async (count, page) => {
     try {
         const result = await prisma.adopts.findMany({
+            where: {
+                status: "PENDING"
+            },
             orderBy: { id: "desc" },
             take: +count,
             skip: ((+page) - 1) * count,
             select: {
-                id:true,
+                id: true,
                 career: true,
                 status: true,
-                address:true,
+                address: true,
                 workTime: true,
                 workPlace: true,
                 dayOff: true,
@@ -367,9 +362,9 @@ exports.getAllAdoptRequest = async (count, page) => {
                 hasFence: true,
                 canWalkDog: true,
                 deliveryType: true,
-                approved_at:true,
-                approved_by:true,
-                created_at:true,
+                approved_at: true,
+                approved_by: true,
+                created_at: true,
                 user: {
                     select: {
                         email: true,

@@ -12,7 +12,7 @@ const { getUserProfile, checkUserByUserId } = require('../services/user-service'
 exports.sendEmail = async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({ message: 'Unauthorized: No token provided' });
+        return createError(401, 'Unauthorized: No token provided');
     }
 
     try {
@@ -41,8 +41,6 @@ exports.getProfile = async (req, res, next) => {
     try {
 
         const userId = req.user.id;
-        console.log(userId, "userrrrIDdd");
-
         const user = await getUserProfile(userId);
 
         if (!user) {
