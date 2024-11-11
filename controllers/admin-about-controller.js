@@ -14,7 +14,6 @@ const adminAboutPageController = {
     }
   },
 
-  
 
   // ฟังก์ชันอัพเดทข้อมูล AboutContent
   updateAboutContent: async (req, res) => {
@@ -45,7 +44,7 @@ const adminAboutPageController = {
           }
         })
         for(let key in files){
-          console.log("prev img",prevImg[key])
+          
           if (prevImg[key].includes("cloudinary")) {
             await cloudinary.uploader.destroy(prevImg[key].match(/\/v\d+\/(.+)\.[a-z]+$/)[1]);
           }
