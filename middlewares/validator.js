@@ -13,11 +13,11 @@ const registerAuthen = Joi.object({
         }),
 
     password: Joi.string()
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-{}[\]:;"'<>,.?/\\|`~]).{6,}$/)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z]).{6,}$/)
         .required()
         .messages({
             "string.empty": "Password is required",
-            "string.pattern.base": "Password must contain a-z A-Z 0-9 !@#$%^&* and at least 6 characters"
+            "string.pattern.base": "Password must contain a-z A-Z 0-9 and at least 6 characters"
         }),
     confirmPassword: Joi.string()
         .required()
@@ -40,11 +40,11 @@ const loginAuthen = Joi.object({
             "string.email": "Email must be a valid email address"
         }),
     password: Joi.string()
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-{}[\]:;"'<>,.?/\\|`~]).{6,}$/)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z]).{6,}$/)
         .required()
         .messages({
             "string.empty": "Password is required",
-            "string.pattern.base": "Password must contain a-z A-Z 0-9 !@#$%^&* and at least 6 characters"
+            "string.pattern.base": "Wrong password"
         }),
 })
 

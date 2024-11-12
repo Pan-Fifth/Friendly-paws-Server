@@ -13,7 +13,11 @@ module.exports.getAllUsers = async (req, res, next) => {
     //   return next(createError(403, 'Access denied. Only admins can perform this action.'));
     // }
 
-    const users = await prisma.users.findMany();
+    const users = await prisma.users.findMany({
+      orderBy: {
+        role: 'desc',
+      }
+    });
     res.json(users);
   } catch (error) {
     next(createError(500, 'Failed to retrieve users.'));
