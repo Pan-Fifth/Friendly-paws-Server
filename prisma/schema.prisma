@@ -316,6 +316,8 @@ model AboutContent {
   help_content_th String @db.Text
   content_en      String @db.Text
   content_th      String @db.Text
+  content_detail_en      String? @db.Text
+  content_detail_th      String? @db.Text
 }
 
 model EventBanner {

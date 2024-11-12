@@ -349,6 +349,10 @@ async function main() {
       content_en: "Mission Statement|Vision|Values|Our Impact",
       content_th: "พันธกิจ|วิสัยทัศน์|ค่านิยม|ผลกระทบของเรา",
 
+      // Additional content that can be split using the '|' delimiter
+      content_detail_en: "Description",
+      content_detail_th: "รายละเอียด",
+
       video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       image1 : "https://cdn.pixabay.com/photo/2021/01/30/15/15/dog-5964181_1280.jpg",
       image2 : "https://cdn.pixabay.com/photo/2024/07/31/06/12/stray-8933778_1280.png",
