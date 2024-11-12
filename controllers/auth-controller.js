@@ -10,6 +10,35 @@ const createError = require("../utils/createError")
 const { getUserByEmail, createNewUser, findUserByGoogleId, createGoogleUser, updateUser } = require("../services/auth-service")
 
 
+const verifyFacebookToken = async (accessToken, userID) => {
+    const url = `https://graph.facebook.com/v8.0/${userID}?fields=id,name,email&access_token=${accessToken}`;
+    const response = await axios.get(url);
+    return response.data;
+};
+
+exports.facebookLogin = async (req, res, next) => {
+    const { accessToken, userID } = req.body;
+
+    try {
+        const facebookData = await verifyFacebookToken(accessToken, userID);
+
+        if (!facebookData || facebookData.id !== userID) {
+            return next(createError(401, 'Invalid Facebook token'));
+        }
+
+        // Generate JWT token for the application user
+        const token = jwt.sign(
+            { id: facebookData.id, email: facebookData.email, name: facebookData.name },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+
+        res.json({ token, user: facebookData });
+    } catch (err) {
+        console.error('Error in facebookLogin:', err);
+        next(err);
+    }
+};
 exports.register = async (req, res, next) => {
 
     try {
