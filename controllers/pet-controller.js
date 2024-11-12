@@ -360,7 +360,7 @@ exports.updatePets = async (req, res, next) => {
     });
 
         res.json({
-            message: 'Pet created',
+            message: 'Pet updated',
             updatedPet,
         });
 
