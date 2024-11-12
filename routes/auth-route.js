@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { register, login, loginGoogle, forgetPassword, resetPassword, getPrivacyPolicy, getTermsOfService } = require("../controllers/auth-controller");
+const { register, login, loginGoogle, forgetPassword, resetPassword, getPrivacyPolicy, getTermsOfService, verification } = require("../controllers/auth-controller");
 const { registerAuthen, loginAuthen } = require("../middlewares/validator");
 
 
@@ -12,5 +12,11 @@ router.get('/terms', getTermsOfService);
 
 router.post('/forget-password', forgetPassword);
 router.post('/reset-password/:token', resetPassword);
+
+router.get('/verification/:token',verification)
+
+console.log("register:", register);
+console.log("registerAuthen:", registerAuthen);
+
 
 module.exports = router;

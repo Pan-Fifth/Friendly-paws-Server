@@ -5,6 +5,7 @@ const { aiCalScore } = require('../services/ai-scoring')
 const prisma = require("../configs/prisma");
 
 
+
 exports.reportEventByDate = async (req, res, next) => {
 
     const token = req.headers.authorization?.split(' ')[1];
@@ -134,12 +135,13 @@ exports.reportAllPetList = async (req, res, next) => {
 
 exports.allAdoptRequest = async (req, res, next) => {
     try {
-        const { count, page } = req.params
+        const { count, page ,filter} = req.params
         const user = req.user
+        console.log("filter",filter)
         if (user.role !== "ADMIN") {
             return createError(401, "unauthorized")
         }
-        const adoptRequest = await getAllAdoptRequest(count, page);
+        const adoptRequest = await getAllAdoptRequest(count, page,filter);
         res.json(adoptRequest)
     } catch (err) {
         next(err)

@@ -335,7 +335,7 @@ exports.getAllPetList = async () => {
     }
 };
 
-exports.getAllAdoptRequest = async (count, page) => {
+exports.getAllAdoptRequest = async (count, page,filter) => {
     try {
         const result = await prisma.adopts.findMany({
             where: {

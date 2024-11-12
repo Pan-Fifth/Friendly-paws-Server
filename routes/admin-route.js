@@ -37,7 +37,7 @@ router.put('/users/:id', authenticate, updateUserById);
 router.delete('/users/:id', authenticate, deleteUserById);
 
 // all adopt request for adopt manage page
-router.get("/all-adopts/:count/:page", authenticate, allAdoptRequest)
+router.get("/all-adopts/:count/:filter/:page", authenticate, allAdoptRequest)
 router.get("/score/:id/:lang", authenticate, checkScore)
 // edit adopt request
 router.patch("/edit-adopt-request/:id", authenticate, editAdoptRequest)
@@ -64,7 +64,7 @@ router.put('/home-content/:id', uploadFields, adminHomePageController.updateHome
 
 // จัดการข้อมูล About Content
 router.get('/about-content', adminAboutPageController.getAboutContent);
-router.put('/about-content/:id', uploadFields, adminAboutPageController.updateAboutContent);
+router.put('/about-content/:id',uploadFields, adminAboutPageController.updateAboutContent);
 
 // จัดการข้อมูล ContactInfo
 router.get('/contact-info', adminContactController.getContactInfo);  // ดึงข้อมูล ContactInfo

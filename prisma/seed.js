@@ -350,7 +350,10 @@ async function main() {
       content_th: "พันธกิจ|วิสัยทัศน์|ค่านิยม|ผลกระทบของเรา",
 
       video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      image: "/src/assets/dog.png",
+      image1 : "https://cdn.pixabay.com/photo/2021/01/30/15/15/dog-5964181_1280.jpg",
+      image2 : "https://cdn.pixabay.com/photo/2024/07/31/06/12/stray-8933778_1280.png",
+      image3 : "https://cdn.pixabay.com/photo/2023/03/14/14/57/cat-box-7852492_1280.jpg",
+      image4 : "https://cdn.pixabay.com/photo/2020/11/17/18/20/dog-5753302_1280.jpg",
     }
   });
   
