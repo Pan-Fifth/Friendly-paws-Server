@@ -12,7 +12,7 @@ router.get("/", authenticate, allPets)
 router.post("/", authenticate, uploadMulter.array('image', 3), createPets)
 router.patch("/:id", authenticate, uploadMulter.array('image', 3), updatePets)
 router.delete("/:id", authenticate, uploadMulter.single('image'), deletePets)
-router.post("/create-adopt",authenticate, uploadMulter.array('files', 5), adoptValidationSchema, createAdoptRequest)
+router.post("/create-adopt",authenticate, uploadMulter.array('files', 5),adoptValidationSchema, createAdoptRequest)
 
 
 
