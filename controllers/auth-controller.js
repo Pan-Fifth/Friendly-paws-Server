@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const axios = require('axios');
+
 
 const createError = require("../utils/createError")
 const { getUserByEmail, createNewUser, findUserByGoogleId, createGoogleUser, updateUser } = require("../services/auth-service")
@@ -17,28 +19,52 @@ const verifyFacebookToken = async (accessToken, userID) => {
 };
 
 exports.facebookLogin = async (req, res, next) => {
-    const { accessToken, userID } = req.body;
+    const { tokenFacebook, facebookId } = req.body;
 
     try {
-        const facebookData = await verifyFacebookToken(accessToken, userID);
+        const facebookData = await verifyFacebookToken(tokenFacebook, facebookId);
 
-        if (!facebookData || facebookData.id !== userID) {
+        if (!facebookData || facebookData.id !== facebookId) {
             return next(createError(401, 'Invalid Facebook token'));
         }
 
-        // Generate JWT token for the application user
-        const token = jwt.sign(
-            { id: facebookData.id, email: facebookData.email, name: facebookData.name },
+        let user = await prisma.users.findFirst({
+            where: { facebookId: facebookData.id },
+        });
+
+        if (!user) {
+            user = await prisma.users.create({
+                data: {
+                    facebookId: facebookData.id,
+                    tokenFacebook,
+                    email: facebookData.email,
+                    firstname: facebookData.name,
+                    isVerify: true,
+                    password: "",
+                },
+            });
+        } else {
+            user = await prisma.users.update({
+                where: { id: user.id },
+                data: {
+                    tokenFacebook,
+                },
+            });
+        }
+
+        const jwtToken = jwt.sign(
+            { id: user.id, email: user.email },
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
 
-        res.json({ token, user: facebookData });
-    } catch (err) {
-        console.error('Error in facebookLogin:', err);
-        next(err);
+        res.json({ token: jwtToken, user });
+    } catch (error) {
+        console.error('Error in facebookLogin:', error);
+        next(error);
     }
 };
+
 exports.register = async (req, res, next) => {
 
     try {
