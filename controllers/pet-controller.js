@@ -398,13 +398,13 @@ exports.deletePets = async (req, res, next) => {
 
 exports.createAdoptRequest = async (req, res, next) => {
   try {
+    console.log("new",req.body)
     const {
       userId,
       petId,
       firstname,
       lastname,
       phone,
-
       address,
       career,
       workTime,

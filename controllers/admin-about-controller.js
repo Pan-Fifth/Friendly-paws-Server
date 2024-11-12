@@ -30,7 +30,9 @@ const adminAboutPageController = {
         help_content_en,
         help_content_th,
         content_en,
-        content_th
+        content_th,
+        content_detail_en,
+        content_detail_th,
       } = req.body;
 
       const files = req.files;
@@ -68,6 +70,8 @@ const adminAboutPageController = {
       if (help_content_th) updateData.help_content_th = help_content_th;
       if (content_en) updateData.content_en = content_en;
       if (content_th) updateData.content_th = content_th;
+      if (content_detail_en) updateData.content_detail_en = content_detail_en;
+      if (content_detail_th) updateData.content_detail_th = content_detail_th;
 
       const updatedContent = await prisma.aboutContent.update({
         where: { id: parseInt(id) },
