@@ -180,7 +180,7 @@ const sendResetEmail = async (email, token) => {
         from: process.env.EMAIL_USER,
         to: email,
         subject: 'Reset Your Password',
-        text: `Click this link to reset your password.: http://localhost:5173/auth/reset-password/${token}`,
+        text: `Click this link to reset your password.: http://localhost:5173/reset-password/${token}`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -189,16 +189,13 @@ const sendResetEmail = async (email, token) => {
 exports.forgetPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
-        console.log(email, "email backend")
         const user = await getUserByEmail(email)
-        console.log('user forgetpass :>> ', user);
         if (!user) {
             return createError(404, 'email not found');
         }
 
         const token = crypto.randomBytes(20).toString('hex');
         const expiry = new Date(Date.now() + 3600000);
-        console.log('Generated token and expiry:', token, expiry);
 
         await prisma.users.update({
             where: { email },
@@ -209,9 +206,7 @@ exports.forgetPassword = async (req, res, next) => {
         });
 
         await sendResetEmail(email, token);
-        console.log('Reset email sent successfully');
-
-        res.json({ message: 'The password reset link has been sent to your email.', tokenEmail: token });
+        res.status(200).json({ success: true, message: 'Password reset link sent.' });
     } catch (error) {
         next(error);
     }

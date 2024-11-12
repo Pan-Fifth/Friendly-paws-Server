@@ -24,7 +24,13 @@ exports.getAdoptHistory = async (req, res, next) => {
                         color: true,
                         breed_en: true,
                         breed_th: true,
+                        image: {
+                            select: {
+                                url: true,
+                            },
+                        },
                     }
+
                 }
             },
             orderBy: {
