@@ -57,7 +57,7 @@ exports.editProfile = async (req, res, next) => {
     try {
 
         const userId = Number(req.params.userId);
-        const { firstname, lastname, phone, email } = req.body;
+        const { firstname, lastname, phone } = req.body;
 
         const checkUser = await checkUserByUserId(userId);
 
@@ -72,17 +72,12 @@ exports.editProfile = async (req, res, next) => {
             return next(createError(400, "Phone number already exists"));
         }
 
-        const checkEmail = await prisma.users.findFirst({
-            where: { email },
-        });
-        if (checkEmail && checkEmail.id !== userId) {
-            return next(createError(400, "Email already exists"));
-        }
+
 
         // อัปเดตข้อมูลผู้ใช้
         const updatedUser = await prisma.users.update({
             where: { id: userId }, // ใช้ userId ในการอัปเดต
-            data: { firstname, lastname, phone, email },
+            data: { firstname, lastname, phone, },
         });
 
         res.json({ message: "Update success", user: updatedUser });
