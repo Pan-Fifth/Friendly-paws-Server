@@ -42,6 +42,7 @@ exports.facebookLogin = async (req, res, next) => {
                     isVerify: true,
                 },
             });
+            console.log(user, "user")
         } else {
             user = await prisma.users.update({
                 where: { id: user.id },
