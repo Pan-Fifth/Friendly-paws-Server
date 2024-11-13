@@ -5,10 +5,64 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const axios = require('axios');
+
 
 const createError = require("../utils/createError")
 const { getUserByEmail, createNewUser, findUserByGoogleId, createGoogleUser, updateUser } = require("../services/auth-service")
 
+
+const verifyFacebookToken = async (accessToken, userID) => {
+    const url = `https://graph.facebook.com/v8.0/${userID}?fields=id,name,email&access_token=${accessToken}`;
+    const response = await axios.get(url);
+    return response.data;
+};
+
+exports.facebookLogin = async (req, res, next) => {
+    const { tokenFacebook, facebookId } = req.body;
+
+    try {
+        const facebookData = await verifyFacebookToken(tokenFacebook, facebookId);
+
+        if (!facebookData || facebookData.id !== facebookId) {
+            return next(createError(401, 'Invalid Facebook token'));
+        }
+        console.log(facebookData, "facebookData")
+        let user = await prisma.users.findFirst({
+            where: { facebookId: facebookData.id },
+        });
+
+        if (!user) {
+            user = await prisma.users.create({
+                data: {
+                    facebookId: facebookData.id,
+                    tokenFacebook,
+                    email: facebookData.email,
+                    firstname: facebookData.name,
+                    isVerify: true,
+                },
+            });
+            console.log(user, "user")
+        } else {
+            user = await prisma.users.update({
+                where: { id: user.id },
+                data: {
+                    tokenFacebook,
+                },
+            });
+        }
+
+        const jwtToken = jwt.sign(
+            { user: { id: user.id, email: user.email } },
+            process.env.JWT_SECRET, { expiresIn: '1d' }
+        );
+
+        res.json({ token: jwtToken, user });
+    } catch (error) {
+        console.error('Error in facebookLogin:', error);
+        next(error);
+    }
+};
 
 exports.register = async (req, res, next) => {
 
