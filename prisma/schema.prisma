@@ -17,7 +17,7 @@ datasource db {
 model Users {
   id                Int              @id @default(autoincrement())
   email             String           @unique
-  password          String
+  password          String?
   firstname         String?
   lastname          String?
   phone             String?
@@ -29,7 +29,7 @@ model Users {
   role              Role             @default(USER)
   isVerify          Boolean?         @default(false)
   facebookId        String?
-  tokenFacebook     String?         
+  tokenFacebook     String?          @db.VarChar(255)
   // Relations
   pets              Pets[]
   adoptions         Adopts[]         @relation("UserAdoptions")
@@ -300,24 +300,24 @@ model HomeContent {
 }
 
 model AboutContent {
-  id              Int    @id @default(autoincrement())
-  video_url       String
-  image1          String? @default("https://cdn.pixabay.com/photo/2021/01/30/15/15/dog-5964181_1280.jpg")
-  image2          String? @default("https://cdn.pixabay.com/photo/2024/07/31/06/12/stray-8933778_1280.png")
-  image3          String? @default("https://cdn.pixabay.com/photo/2023/03/14/14/57/cat-box-7852492_1280.jpg")
-  image4          String? @default("https://cdn.pixabay.com/photo/2020/11/17/18/20/dog-5753302_1280.jpg")
-  header_en       String @db.Text
-  header_th       String @db.Text
-  description_en  String @db.Text
-  description_th  String @db.Text
-  help_title_en   String
-  help_title_th   String
-  help_content_en String @db.Text
-  help_content_th String @db.Text
-  content_en      String @db.Text
-  content_th      String @db.Text
-  content_detail_en      String? @db.Text
-  content_detail_th      String? @db.Text
+  id                Int     @id @default(autoincrement())
+  video_url         String
+  image1            String? @default("https://cdn.pixabay.com/photo/2021/01/30/15/15/dog-5964181_1280.jpg")
+  image2            String? @default("https://cdn.pixabay.com/photo/2024/07/31/06/12/stray-8933778_1280.png")
+  image3            String? @default("https://cdn.pixabay.com/photo/2023/03/14/14/57/cat-box-7852492_1280.jpg")
+  image4            String? @default("https://cdn.pixabay.com/photo/2020/11/17/18/20/dog-5753302_1280.jpg")
+  header_en         String  @db.Text
+  header_th         String  @db.Text
+  description_en    String  @db.Text
+  description_th    String  @db.Text
+  help_title_en     String
+  help_title_th     String
+  help_content_en   String  @db.Text
+  help_content_th   String  @db.Text
+  content_en        String  @db.Text
+  content_th        String  @db.Text
+  content_detail_en String? @db.Text
+  content_detail_th String? @db.Text
 }
 
 model EventBanner {

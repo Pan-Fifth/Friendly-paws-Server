@@ -27,7 +27,7 @@ exports.facebookLogin = async (req, res, next) => {
         if (!facebookData || facebookData.id !== facebookId) {
             return next(createError(401, 'Invalid Facebook token'));
         }
-
+        console.log(facebookData, "facebookData")
         let user = await prisma.users.findFirst({
             where: { facebookId: facebookData.id },
         });
@@ -40,7 +40,6 @@ exports.facebookLogin = async (req, res, next) => {
                     email: facebookData.email,
                     firstname: facebookData.name,
                     isVerify: true,
-                    password: "",
                 },
             });
         } else {
@@ -53,9 +52,8 @@ exports.facebookLogin = async (req, res, next) => {
         }
 
         const jwtToken = jwt.sign(
-            { id: user.id, email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: '1d' }
+            { user: { id: user.id, email: user.email } },
+            process.env.JWT_SECRET, { expiresIn: '1d' }
         );
 
         res.json({ token: jwtToken, user });
