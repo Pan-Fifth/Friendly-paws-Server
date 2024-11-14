@@ -4,6 +4,7 @@ const createError = require('../utils/createError')
 const cloudinary = require('../configs/cloudinary')
 const path = require('path')
 const fs = require('fs/promises')
+const nodemailer = require("nodemailer")
 
 
 exports.aPets = async (req, res, next) => {
@@ -140,11 +141,14 @@ exports.pet = async (req, res, next) => {
 exports.allPets = async (req, res, next) => {
   try {
     const user = req.user
-
+    const { page } = req.params
     if (user.role !== "ADMIN") {
       return createError(400, "Unauthorized")
     }
     const getAllpets = await prisma.pets.findMany({
+      orderBy: { id: "asc" },
+      take: 10,
+      skip: ((+page) - 1) * 10,
       include: {
         image: true
       }
@@ -157,8 +161,6 @@ exports.allPets = async (req, res, next) => {
     next(err)
   }
 }
-
-
 
 
 exports.createPets = async (req, res, next) => {
@@ -435,9 +437,9 @@ exports.createAdoptRequest = async (req, res, next) => {
       },
     });
 
-    if (hasAdopt) {
-      return createError(400, "This pet you already has a request");
-    }
+    // if (hasAdopt) {
+    //   return createError(400, "This pet you already has a request");
+    // }
 
     const user = await prisma.users.findFirst({
       where: {
@@ -445,9 +447,23 @@ exports.createAdoptRequest = async (req, res, next) => {
       },
     });
 
-    if (!user) {
-      return createError(400, "This user not found");
-    }
+    const pet = await prisma.pets.findFirst({
+      where: {
+        id: +petId,
+      },
+      include: {
+        image: {
+          take: 1,
+          select: {
+            url: true
+          }
+        }
+      }
+    });
+
+    // if (!user) {
+    //   return createError(400, "This user not found");
+    // }
 
     const updateUser = await prisma.users.update({
       where: {
@@ -485,33 +501,84 @@ exports.createAdoptRequest = async (req, res, next) => {
       why,
     };
 
-    const createAdoptRequest = await prisma.adopts.create({
-      data: data,
+    // const createAdoptRequest = await prisma.adopts.create({
+    //   data: data,
+    // });
+    // console.log(pet.image[0].url)
+    // if (req.files.length < 1) {
+    //   return createError(400, "no file given")
+    // }
+    // const imagePromiseArray = []
+    // for (let file of req.files) {
+    //   const promiseUrl = cloudinary.uploader.upload(file.path)
+    //   imagePromiseArray.push(promiseUrl)
+    // }
+
+    // const imageArray = await Promise.all(imagePromiseArray);
+    // const homePics = await prisma.homeImages.createMany({
+    //   data: imageArray.map((el) => ({
+    //     adoptId: createAdoptRequest.id,
+    //     url: el.secure_url,
+    //   })),
+    // });
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_ADMIN,
+        pass: process.env.EMAIL_PASS
+      }
+    })
+
+    await transporter.sendMail({
+      to: updateUser.email,
+      subject: "Adoption Request has been received to Friendly Paws",
+      html: `
+      <div>
+      <img src="https://res.cloudinary.com/dqlfh6fxi/image/upload/v1731583303/v6myb7blzmbxqmf6fg2a.png" style="max-width: 200px;" alt="logo"/>
+      <p>Adopt Request Personal Details</p>
+        <p>Name: ${firstname} <span>LastName: ${lastname}</span></p>
+        <p>Career: ${career}</p>
+        <p>Work Time: ${workTime} hours/day</p>
+        <p>Day Off: ${dayOff} days/week</p>
+        <p>Salary: ${salary} per month</p>
+        <p>Date of Birth: ${dateOfBirth}</p>
+        <p>Current Pet Count: ${currentPetCount}</p>
+        <p>Family Member Count: ${familyMemberCount}</p>
+        <p>Does family always stay home: ${familyAlwaysHome}</p>
+        <p>Housing Type: ${housingType}</p>
+        <p>Has a garden: ${hasGarden}</p>
+        <p>Has a fence: ${hasFence}</p>
+        <p>Can walk dog: ${canWalkDog}</p>
+        <p>Reason for wanting to adopt a pet: ${why}</p>
+    
+        <br/>
+    
+        <p>Adopt Request Pet Details</p>
+        <p>Pet's name: ${pet.name_en}</p>
+        <p>Pet's Breed: ${pet.breed_en}</p>
+        <p>Pet's Gender: ${pet.gender}</p>
+        <p>Pet's Weight: ${pet.weight}</p>
+    
+        <p>Please keep in touch, our agent will contact you soon...</p>
+      </div>
+      `,
+      attachments: [{
+        filename: 'pet-image.jpg',
+        path: pet.image[0].url,
+        cid: 'unique-pet-image'
+      }]
+
     });
 
-    if (req.files.length < 1) {
-      return createError(400, "no file given")
-    }
-    const imagePromiseArray = []
-    for (let file of req.files) {
-      const promiseUrl = cloudinary.uploader.upload(file.path)
-      imagePromiseArray.push(promiseUrl)
-    }
 
-    const imageArray = await Promise.all(imagePromiseArray);
-    const homePics = await prisma.homeImages.createMany({
-      data: imageArray.map((el) => ({
-        adoptId: createAdoptRequest.id,
-        url: el.secure_url,
-      })),
-    });
-
-    res.json(updateUser, createAdoptRequest, homePics);
+    // res.json(updateUser, createAdoptRequest, homePics);
+    res.json("ok");
   } catch (err) {
     next(err);
   } finally {
-    const deleteFile = req.files.map((file) => fs.unlink(file.path));
-    await Promise.all(deleteFile);
+    // const deleteFile = req.files.map((file) => fs.unlink(file.path));
+    // await Promise.all(deleteFile);
   }
 };
 
