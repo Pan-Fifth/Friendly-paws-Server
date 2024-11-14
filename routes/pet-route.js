@@ -8,7 +8,7 @@ const { authenticate } = require('../middlewares/authenticate');
 router.get("/get-apets/:count/:page",aPets)
 router.get("/random",getRandomPets)
 router.get("/:id",pet)
-router.get("/", authenticate, allPets)
+router.get("/page/:page", authenticate, allPets)
 router.post("/", authenticate, uploadMulter.array('image', 3), createPets)
 router.patch("/:id", authenticate, uploadMulter.array('image', 3), updatePets)
 router.delete("/:id", authenticate, uploadMulter.single('image'), deletePets)
