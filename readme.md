@@ -1,11 +1,12 @@
 ## Friendly-Paws
 
+Friendly Paws is a comprehensive digital platform dedicated to supporting animal adoption, facilitating donations, and promoting events for a compassionate foundation. Our goal is to simplify the adoption process and enhance the foundation’s operations by providing an easy-to-use, mobile-friendly web platform
 ---
 ###### 
 
 ## SRS
 
-https://docs.google.com/document/d/1Y35Uwklm7vvq3T7Q6-gyoD7OrEXuinLMdXgXn1yVr40/edit?tab=t.0#heading=h.uf5727nfzc57
+https://docs.google.com/document/d/1k49sbkPKSOogQPt_F9U0WlzJI04bgbU_FjCQOcGlgpI/edit?tab=t.0
 
 ## Figma
 https://www.figma.com/design/0BfT5lUMJhgnjVxsWTr1Kl/PetsRescueProject?node-id=6-191&node-type=frame&t=LBaMjn0yfO0m5O5C-0
