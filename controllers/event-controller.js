@@ -63,6 +63,9 @@ exports.eventShowPages = async (req, res) => {
         // [descriptionField]: true,
         image: { select: { url: true } },
       },
+      orderBy: {
+        date_start: "asc",
+      }
     });
     // const formattedPastEvent = pastEvent.map(event => ({
     //     ...event,
