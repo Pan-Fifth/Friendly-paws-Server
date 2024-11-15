@@ -118,6 +118,28 @@ exports.login = async (req, res, next) => {
 
             return createError(400, "User not found!!")
         }
+        if (user.isVerify === false) {
+            const token = jwt.sign({ user: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" })
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_ADMIN,
+                    pass: process.env.EMAIL_PASS
+                }
+            })
+            const verificationLink = `${process.env.BASE_URL}/auth/verification/${token}`
+
+            await transporter.sendMail({
+                to: email,
+                subject: "Email Verification by Friendly Paws",
+                // text: "Please verify your email by clicking on this link: ",
+                html: `
+                <img src="https://res.cloudinary.com/dqlfh6fxi/image/upload/v1731583303/v6myb7blzmbxqmf6fg2a.png" style="max-width: 200px;" alt="logo"/>
+                <p>Please verify by clicking the following link : </p> <a href=${verificationLink} target="_blank" rel="noopener noreferrer">Click this link</a>`,
+            });
+            return createError(400, "Please verify your email first!!")
+
+        }
 
         const checkPassword = await bcryptjs.compare(password, user.password)
 
@@ -346,7 +368,7 @@ exports.verification = async (req, res, next) => {
             }
         })
         // res.json({message:"account has been verified",redirectUrl:"https://localhost:5173/login" })
-        res.redirect('http://localhost:5173')
+        res.redirect('http://localhost:5173/login')
     } catch (err) {
         next(err)
     }

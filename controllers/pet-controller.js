@@ -437,9 +437,9 @@ exports.createAdoptRequest = async (req, res, next) => {
       },
     });
 
-    // if (hasAdopt) {
-    //   return createError(400, "This pet you already has a request");
-    // }
+    if (hasAdopt) {
+      return createError(400, "This pet you already has a request");
+    }
 
     const user = await prisma.users.findFirst({
       where: {
@@ -452,18 +452,14 @@ exports.createAdoptRequest = async (req, res, next) => {
         id: +petId,
       },
       include: {
-        image: {
-          take: 1,
-          select: {
-            url: true
-          }
-        }
+        image: true
+
       }
     });
 
-    // if (!user) {
-    //   return createError(400, "This user not found");
-    // }
+    if (!user) {
+      return createError(400, "This user not found");
+    }
 
     const updateUser = await prisma.users.update({
       where: {
@@ -501,26 +497,26 @@ exports.createAdoptRequest = async (req, res, next) => {
       why,
     };
 
-    // const createAdoptRequest = await prisma.adopts.create({
-    //   data: data,
-    // });
-    // console.log(pet.image[0].url)
-    // if (req.files.length < 1) {
-    //   return createError(400, "no file given")
-    // }
-    // const imagePromiseArray = []
-    // for (let file of req.files) {
-    //   const promiseUrl = cloudinary.uploader.upload(file.path)
-    //   imagePromiseArray.push(promiseUrl)
-    // }
+    const createAdoptRequest = await prisma.adopts.create({
+      data: data,
+    });
 
-    // const imageArray = await Promise.all(imagePromiseArray);
-    // const homePics = await prisma.homeImages.createMany({
-    //   data: imageArray.map((el) => ({
-    //     adoptId: createAdoptRequest.id,
-    //     url: el.secure_url,
-    //   })),
-    // });
+    if (req.files.length < 1) {
+      return createError(400, "no file given")
+    }
+    const imagePromiseArray = []
+    for (let file of req.files) {
+      const promiseUrl = cloudinary.uploader.upload(file.path)
+      imagePromiseArray.push(promiseUrl)
+    }
+
+    const imageArray = await Promise.all(imagePromiseArray);
+    const homePics = await prisma.homeImages.createMany({
+      data: imageArray.map((el) => ({
+        adoptId: createAdoptRequest.id,
+        url: el.secure_url,
+      })),
+    });
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -536,49 +532,50 @@ exports.createAdoptRequest = async (req, res, next) => {
       html: `
       <div>
       <img src="https://res.cloudinary.com/dqlfh6fxi/image/upload/v1731583303/v6myb7blzmbxqmf6fg2a.png" style="max-width: 200px;" alt="logo"/>
-      <p>Adopt Request Personal Details</p>
-        <p>Name: ${firstname} <span>LastName: ${lastname}</span></p>
-        <p>Career: ${career}</p>
-        <p>Work Time: ${workTime} hours/day</p>
-        <p>Day Off: ${dayOff} days/week</p>
-        <p>Salary: ${salary} per month</p>
-        <p>Date of Birth: ${dateOfBirth}</p>
-        <p>Current Pet Count: ${currentPetCount}</p>
-        <p>Family Member Count: ${familyMemberCount}</p>
-        <p>Does family always stay home: ${familyAlwaysHome}</p>
-        <p>Housing Type: ${housingType}</p>
-        <p>Has a garden: ${hasGarden}</p>
-        <p>Has a fence: ${hasFence}</p>
-        <p>Can walk dog: ${canWalkDog}</p>
-        <p>Reason for wanting to adopt a pet: ${why}</p>
-    
-        <br/>
-    
-        <p>Adopt Request Pet Details</p>
-        <p>Pet's name: ${pet.name_en}</p>
-        <p>Pet's Breed: ${pet.breed_en}</p>
-        <p>Pet's Gender: ${pet.gender}</p>
-        <p>Pet's Weight: ${pet.weight}</p>
-    
-        <p>Please keep in touch, our agent will contact you soon...</p>
+      <p><strong>Adopt Request Personal Details</strong></p>
+
+<p><strong>Name:</strong> ${firstname} <span><strong>LastName:</strong> ${lastname}</span></p>
+<p><strong>Career:</strong> ${career}</p>
+<p><strong>Work Time:</strong> ${workTime} hours/day</p>
+<p><strong>Day Off:</strong> ${dayOff} days/week</p>
+<p><strong>Salary:</strong> ${salary} per month</p>
+<p><strong>Date of Birth:</strong> ${dateOfBirth}</p>
+<p><strong>Current Pet Count:</strong> ${currentPetCount}</p>
+<p><strong>Family Member Count:</strong> ${familyMemberCount}</p>
+<p><strong>Does family always stay home:</strong> ${familyAlwaysHome}</p>
+<p><strong>Housing Type:</strong> ${housingType}</p>
+<p><strong>Has a garden:</strong> ${hasGarden}</p>
+<p><strong>Has a fence:</strong> ${hasFence}</p>
+<p><strong>Can walk dog:</strong> ${canWalkDog}</p>
+<p><strong>Reason for wanting to adopt a pet:</strong> ${why}</p>
+
+<br/>
+
+<p><strong>Adopt Request Pet Details</strong></p>
+<p><strong>Pet's name:</strong> ${pet.name_en}</p>
+<p><strong>Pet's Breed:</strong> ${pet.breed_en}</p>
+<p><strong>Pet's Gender:</strong> ${pet.gender}</p>
+<p><strong>Pet's Weight:</strong> ${pet.weight}</p>
+
+<p><strong>Please keep in touch, our agent will contact you soon...</strong></p>
+
       </div>
       `,
-      attachments: [{
-        filename: 'pet-image.jpg',
-        path: pet.image[0].url,
-        cid: 'unique-pet-image'
-      }]
+      attachments: pet.image.map((img, index) => ({
+        filename: `pet-image${index}.jpg`,
+        path: img.url,
+        cid: `pet-image-${img.id}`
+      }))
 
     });
 
 
-    // res.json(updateUser, createAdoptRequest, homePics);
-    res.json("ok");
+    res.json(updateUser, createAdoptRequest, homePics);
   } catch (err) {
     next(err);
   } finally {
-    // const deleteFile = req.files.map((file) => fs.unlink(file.path));
-    // await Promise.all(deleteFile);
+    const deleteFile = req.files.map((file) => fs.unlink(file.path));
+    await Promise.all(deleteFile);
   }
 };
 

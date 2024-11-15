@@ -38,7 +38,7 @@ exports.createGoogleUser = async (data) => {
             password: '',
             firstname: data.firstname,
             lastname: data.lastname,
-            isVerify:true,
+            isVerify: true,
         },
     });
 };

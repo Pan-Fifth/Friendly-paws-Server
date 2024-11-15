@@ -8,7 +8,7 @@ exports.getAdoptHistory = async (req, res, next) => {
         const FindUser = await prisma.adopts.findMany({
             where: {
                 userId: +id,
-                status: 'ADOPTED'
+                // status: 'ADOPTED'
             },
             select: {
                 id: true,
