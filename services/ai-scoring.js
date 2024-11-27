@@ -2,7 +2,7 @@ const {GoogleGenerativeAI} = require("@google/generative-ai")
 
 exports.aiCalScore = async (formData,language) => {
     try {
-        const genAI = new GoogleGenerativeAI("AIzaSyDFQP49YT2evf8SvHVHcWDfPazJxH3egYM")
+        const genAI = new GoogleGenerativeAI()
 
         const model = genAI.getGenerativeModel({
             model: "gemini-1.5-flash",
